@@ -8,6 +8,7 @@ env/
 
 # Other
 .idea/
+.vscode/
 Makefile
 
 # IDE files

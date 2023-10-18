@@ -4,7 +4,7 @@ from sqlalchemy import DECIMAL, TIMESTAMP, Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.database import Base
-
+# from app.quizzes_workflow.models import Attempt
 
 class User(Base):
     __tablename__ = "users"
@@ -18,6 +18,7 @@ class User(Base):
     average_score = Column(DECIMAL, default=0)
 
     companies = relationship("CompanyUser", back_populates="users")
+    # attempts = relationship("Attempt", back_populates="user", lazy='joined') 
 
     def __repr__(self):
         return f"User {self.email}"

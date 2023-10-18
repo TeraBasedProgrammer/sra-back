@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Models
-from app.users.models import User
+from app.users.models import User, Tag, TagQuiz, TagUser
 from app.companies.models import Company
 from app.companies.models import CompanyUser
 from app.quizzes.models import Quiz, Question, Answer

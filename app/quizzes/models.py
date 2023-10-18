@@ -1,11 +1,11 @@
 import enum
 
-from sqlalchemy import (Boolean, Column, ForeignKey, Integer, String, Text,
-                        UniqueConstraint, TIMESTAMP, Enum)
+from sqlalchemy import (TIMESTAMP, Boolean, Column, Enum, ForeignKey, Integer,
+                        String, Text, UniqueConstraint)
 from sqlalchemy.orm import relationship
 
-from app.database import Base
 from app.attempts.models import Attempt
+from app.database import Base
 
 
 class QuestionTypeEnum(enum.Enum):
@@ -32,6 +32,7 @@ class Quiz(Base):
 
     questions = relationship("Question", back_populates="quiz", lazy='joined') 
     attempts = relationship("Attempt", back_populates="quiz", lazy='joined') 
+    tags = relationship("TagQuiz", back_populates="quizzes", lazy='joined')
 
     @property
     def questions_count(self) -> int:

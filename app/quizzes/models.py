@@ -1,11 +1,11 @@
 import enum
 
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, String, Text,
-                        UniqueConstraint, DATETIME, Enum)
+                        UniqueConstraint, TIMESTAMP, Enum)
 from sqlalchemy.orm import relationship
 
 from app.database import Base
-# from app.quizzes_workflow.models import Attempt
+from app.attempts.models import Attempt
 
 
 class QuestionTypeEnum(enum.Enum):
@@ -27,11 +27,11 @@ class Quiz(Base):
     completion_time = Column(Integer, nullable=False)
 
     # Deadlines
-    start_time = Column(DATETIME, nullable=True)
-    end_time = Column(DATETIME, nullable=True)
+    start_time = Column(TIMESTAMP, nullable=True)
+    end_time = Column(TIMESTAMP, nullable=True)
 
     questions = relationship("Question", back_populates="quiz", lazy='joined') 
-    # attempts = relationship("Attempt", back_populates="quiz", lazy='joined') 
+    attempts = relationship("Attempt", back_populates="quiz", lazy='joined') 
 
     @property
     def questions_count(self) -> int:

@@ -25,8 +25,8 @@ def upgrade() -> None:
     sa.Column('company_id', sa.Integer(), nullable=True),
     sa.Column('fully_created', sa.Boolean(), nullable=False),
     sa.Column('completion_time', sa.Integer(), nullable=False),
-    sa.Column('start_time', sa.DATETIME(), nullable=True),
-    sa.Column('end_time', sa.DATETIME(), nullable=True),
+    sa.Column('start_time', sa.TIMESTAMP(), nullable=True),
+    sa.Column('end_time', sa.TIMESTAMP(), nullable=True),
     sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('title', 'company_id', name='_quiz_uc')

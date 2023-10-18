@@ -13,6 +13,7 @@ from app.users.models import User
 from app.companies.models import Company
 from app.companies.models import CompanyUser
 from app.quizzes.models import Quiz, Question, Answer
+from app.attempts.models import Attempt
 
 from app.database import Base
 from app.config import settings

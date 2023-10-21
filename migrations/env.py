@@ -14,8 +14,7 @@ from app.models.db.companies import CompanyUser, Company
 from app.models.db.users import User, Tag, TagQuiz, TagUser
 from app.models.db.attempts import Attempt
 
-from app.repository.database import Base
-from app.config.settings.base import settings
+from app.models.database import Base, DATABASE_URL
 
 
 load_dotenv(".env")
@@ -26,7 +25,7 @@ load_dotenv(".env")
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "DATABASE_URL", settings.DATABASE_URL)
+config.set_section_option(section, "DATABASE_URL", DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

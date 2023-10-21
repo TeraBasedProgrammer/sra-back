@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.repository.database import Base
+from app.models.database import Base
 
 
 class Attempt(Base):

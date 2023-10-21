@@ -5,7 +5,7 @@ from sqlalchemy import (DECIMAL, TIMESTAMP, Boolean, Column, ForeignKey,
 from sqlalchemy.orm import relationship
 
 from .attempts import Attempt
-from app.repository.database import Base
+from app.models.database import Base
 
 
 class User(Base):

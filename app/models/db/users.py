@@ -44,7 +44,7 @@ class TagUser(Base):
     user_id = Column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
 
     users = relationship("User", back_populates="tags", lazy='subquery') 
-    tags = relationship("Tags",  back_populates="users", lazy='subquery')
+    tags = relationship("Tag",  back_populates="users", lazy='subquery')
 
 
 class TagQuiz(Base):
@@ -54,4 +54,4 @@ class TagQuiz(Base):
     quiz_id = Column(ForeignKey("quizzes.id", ondelete="CASCADE"), primary_key=True)
 
     quizzes = relationship("Quiz", back_populates="tags", lazy='subquery') 
-    tags = relationship("Tags",  back_populates="quizzes", lazy='subquery')
+    tags = relationship("Tag",  back_populates="quizzes", lazy='subquery')

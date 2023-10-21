@@ -4,8 +4,8 @@ from sqlalchemy import (TIMESTAMP, Boolean, Column, Enum, ForeignKey, Integer,
                         String, Text, UniqueConstraint)
 from sqlalchemy.orm import relationship
 
-from app.attempts.models import Attempt
-from app.database import Base
+from .attempts import Attempt
+from app.repository.database import Base
 
 
 class QuestionTypeEnum(enum.Enum):

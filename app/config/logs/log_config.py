@@ -5,6 +5,8 @@ from typing import Literal, Optional
 
 import click
 
+from app.config.settings.base import settings
+
 
 class ColorizedFormatter(logging.Formatter):
     level_name_colors = {
@@ -58,7 +60,7 @@ LOGGING_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "app.log_config.ColorizedFormatter",
+            "()": "app.config.logs.log_config.ColorizedFormatter",
             "fmt": "%(asctime)s | %(levelprefix)s | %(funcName)s | %(message)s", 
             "use_colors": True,
         },
@@ -71,6 +73,10 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "main_logger": {"handlers": ["default"], "level": "DEBUG", "propagate": False},
+        "main_logger": {
+            "handlers": ["default"], 
+            "level": settings.LOGGING_LEVEL,
+            "propagate": False
+        },
     },
 }

@@ -7,6 +7,8 @@ services:
     command: >
       sh -c "alembic upgrade head &&
             uvicorn app.main:app --reload --host '0.0.0.0'"
+    # command: 
+    #   "uvicorn app.main:app --reload --host '0.0.0.0'"
     volumes:
       - ./app:/code/app
       - ./migrations:/code/migrations
@@ -25,30 +27,19 @@ services:
     restart: always
     ports:
       - 5432:5432
+    env_file:
+      - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=ryan_gosling
-      - POSTGRES_PASSWORD=password123
-      - POSTGRES_DB=quizz_app 
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
     networks:
       - local
-
-  # test_postgres:
-  #   image: postgres
-  #   restart: always
-  #   ports:
-  #     - 5433:5432
-  #   volumes:
-  #     - test_postgres_data:/var/lib/postgresql/data/
-  #   environment:
-  #     - POSTGRES_USER=test_user
-  #     - POSTGRES_PASSWORD=password
-  #     - POSTGRES_DB=test 
-  #   networks:
-  #     - local
-
-  
+      
   redis:
     image: redis:latest
     ports:
@@ -66,4 +57,3 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  # test_postgres_data:

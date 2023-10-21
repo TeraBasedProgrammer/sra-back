@@ -4,8 +4,8 @@ from sqlalchemy import (DECIMAL, TIMESTAMP, Boolean, Column, ForeignKey,
                         Integer, String)
 from sqlalchemy.orm import relationship
 
-from app.attempts.models import Attempt
-from app.database import Base
+from .attempts import Attempt
+from app.repository.database import Base
 
 
 class User(Base):

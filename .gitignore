@@ -1,15 +1,107 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled, optimized, and DLL files
 __pycache__/
+*.py[cod]
+*$py.class
 
-# Environments
+# Builds
+/build
+*/build
+*.so
+/dist
+/lib
+/lib-types
+/server
+
+# Cache
+.cache
+.pytest_cache/
+.webassets-cache
+.mypy_cache/
+.mf
+.rollup.cache
+tsconfig.tsbuildinfo
+
+# Celery (Python's asynchronous task queues framework)
+celerybeat-schedule
+
+# Code editor (IntelliJ & VSCode)
+*.iml
+*.ipr
+*.iws
+.idea/
+.classpath
+.project
+.settings/
+.vscode/
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Database-related
+*.sqlite3
+*.db
+postgres-data
+
+# Distributions package
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pnpm-store/
+
+# Documentation
+/site
+docs/_build/
+
+# Dotenvs
 .env
 env/
-.env.docker
+ENV/
 
-# Other
-.idea/
-.vscode/
+# Log Files
+*.log
+pip-log.txt
+
+# Project settings
+local_settings.py
+instance/
+.spyderproject
+.spyproject
+.ropeproject
+
+# Tests and coverage reports:
+htmlcov/
+.tox/
+.coverage
+coverage/**
+nosetests.xml
+coverage.html
+coverage.xml
+cov.xml
+cov.html
+*.cover
+.hypothesis/
+
 Makefile
 
-# IDE files
-.vscode
+codecov.yaml
+.github
+.pre-commit-config.yaml

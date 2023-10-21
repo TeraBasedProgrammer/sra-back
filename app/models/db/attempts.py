@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.repository.database import Base
 
 
 class Attempt(Base):
@@ -18,4 +18,4 @@ class Attempt(Base):
     end_time = Column(DateTime)
     spent_time = Column(String)
     result = Column(Integer, default=0)
-    
+ 

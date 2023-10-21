@@ -9,14 +9,13 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Models
-from app.users.models import User, Tag, TagQuiz, TagUser
-from app.companies.models import Company
-from app.companies.models import CompanyUser
-from app.quizzes.models import Quiz, Question, Answer
-from app.attempts.models import Attempt
+from app.models.db.quizzes import Answer, Question, Quiz
+from app.models.db.companies import CompanyUser, Company
+from app.models.db.users import User, Tag, TagQuiz, TagUser
+from app.models.db.attempts import Attempt
 
-from app.database import Base
-from app.config import settings
+from app.repository.database import Base
+from app.config.settings.base import settings
 
 
 load_dotenv(".env")
@@ -27,7 +26,7 @@ load_dotenv(".env")
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "DATABASE_URL", settings.database_url)
+config.set_section_option(section, "DATABASE_URL", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

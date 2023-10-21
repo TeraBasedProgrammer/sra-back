@@ -5,7 +5,7 @@ from sqlalchemy import (TIMESTAMP, Boolean, Column, Enum, ForeignKey, Integer,
 from sqlalchemy.orm import relationship
 
 from .attempts import Attempt
-from app.repository.database import Base
+from app.models.database import Base
 
 
 class QuestionTypeEnum(enum.Enum):

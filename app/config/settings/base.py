@@ -9,13 +9,17 @@ ROOT_DIR = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
 class BackendBaseSettings(BaseSettings):
     DEBUG: bool
     LOGGING_LEVEL: str
-    DATABASE_URL: str
     REDIS_URL: str
     JWT_SECRET: str
     AUTH0_DOMAIN: str
     AUTH0_API_AUDIENCE: str
     AUTH0_ALGORITHMS: str
     AUTH0_ISSUER: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_PORT: int
+    POSTGRES_HOST: str
     IS_ALLOWED_CREDENTIALS: bool
 
     ALLOWED_ORIGINS: list[str] = [

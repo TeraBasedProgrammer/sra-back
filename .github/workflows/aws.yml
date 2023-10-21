@@ -19,7 +19,7 @@
 #    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
 #    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
 #    in the `containerDefinitions` section of the task definition.
-#
+
 # 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
@@ -32,8 +32,8 @@ on:
 
 env:
   AWS_REGION: eu-central-1                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: sra-back           # set this to your Amazon ECR repository name
-  # ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
+ ECR_REPOSITORY: sra-back           # set this to your Amazon ECR repository name
+  ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
   # ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
   # ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
   #                                              # file, e.g. .aws/task-definition.json

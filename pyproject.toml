@@ -29,17 +29,8 @@ exclude = '''
 include = '\.pyi?$'
 line-length = 88
 
+
 [tool.isort]
-color_output = true
-combine_as_imports = true
-ensure_newline_before_comments = true
-force_alphabetical_sort_within_sections = true
-force_grid_wrap = 0
-include_trailing_comma = true
-line_length = 119
-lines_between_sections = 1
-multi_line_output = 3
-profile = "black"
 skip = [
     ".coverage",
     "coverage/*",
@@ -54,12 +45,3 @@ skip = [
     ".rst",
     ".xml"
 ]
-skip_gitignore = true
-skip_glob = [
-    "src/repository/migrations/**",
-]
-src_paths = [
-    "src/",
-    "tests/",
-]
-use_parentheses = true

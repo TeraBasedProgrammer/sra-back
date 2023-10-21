@@ -35,7 +35,11 @@ env:
   ECR_REPOSITORY: sra-back           # set this to your Amazon ECR repository name
   ECS_SERVICE: back                 # set this to your Amazon ECS service name
   ECS_CLUSTER: sra                 # set this to your Amazon ECS cluster name
+<<<<<<< HEAD
   ECS_TASK_DEFINITION: ./.aws/task-definition.json # set this to the path to your Amazon ECS task definition
+=======
+  ECS_TASK_DEFINITION: ../../.aws/task-definition.json # set this to the path to your Amazon ECS task definition
+>>>>>>> ec5cce9610af50d907ff33d775bdc38c0f107256
   #                                              # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: fastapi           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition

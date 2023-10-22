@@ -37,8 +37,7 @@ class BackendBaseSettings(BaseSettings):
     ALLOWED_HEADERS: list[str] = ["*"]
 
     class Config:
-        # env_file = f"{ROOT_DIR}/.env"
-        env_file = None
+        env_file = f"{ROOT_DIR}/.env"
 
 
 settings = BackendBaseSettings()

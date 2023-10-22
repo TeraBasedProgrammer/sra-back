@@ -73,6 +73,7 @@ docs/_build/
 
 # Dotenvs
 .env
+.env.prod
 env/
 ENV/
 

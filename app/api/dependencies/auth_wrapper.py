@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import Security, Depends
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config.settings.base import settings
 from app.securities.authorization.auth_handler import auth_handler, AuthHandler
@@ -9,8 +9,7 @@ from app.utilities.db.user_actions import create_user_or_skip
 
 
 async def auth_wrapper(
-        auth: HTTPAuthorizationCredentials = Security(settings.JWT_SECRET),
-        auth_handler: AuthHandler = Depends(auth_handler)
+        auth: HTTPAuthorizationCredentials = Security(HTTPBearer())
     ) -> Optional[dict[str, bool]]:
         user_data = await auth_handler.decode_token(auth.credentials)
 

@@ -1,26 +1,27 @@
 import pathlib
 
 from pydantic_settings import BaseSettings
+import decouple
 
 
 ROOT_DIR = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
 
 
 class BackendBaseSettings(BaseSettings):
-    DEBUG: bool
-    LOGGING_LEVEL: str
-    REDIS_URL: str
-    JWT_SECRET: str
-    AUTH0_DOMAIN: str
-    AUTH0_API_AUDIENCE: str
-    AUTH0_ALGORITHMS: str
-    AUTH0_ISSUER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    POSTGRES_PORT: int
-    POSTGRES_HOST: str
-    IS_ALLOWED_CREDENTIALS: bool
+    DEBUG: bool = decouple.config("DEBUG", cast=bool)
+    LOGGING_LEVEL: str = decouple.config("LOGGING_LEVEL") 
+    REDIS_URL: str = decouple.config("REDIS_URL") 
+    JWT_SECRET: str = decouple.config("JWT_SECRET") 
+    AUTH0_DOMAIN: str = decouple.config("AUTH0_DOMAIN") 
+    AUTH0_API_AUDIENCE: str = decouple.config("AUTH0_API_AUDIENCE") 
+    AUTH0_ALGORITHMS: str = decouple.config("AUTH0_ALGORITHMS") 
+    AUTH0_ISSUER: str = decouple.config("AUTH0_ISSUER")  
+    POSTGRES_USER: str = decouple.config("POSTGRES_USER") 
+    POSTGRES_PASSWORD: str = decouple.config("POSTGRES_PASSWORD") 
+    POSTGRES_DB: str = decouple.config("POSTGRES_DB") 
+    POSTGRES_PORT: int = decouple.config("POSTGRES_PORT", cast=int) 
+    POSTGRES_HOST: str = decouple.config("POSTGRES_HOST") 
+    IS_ALLOWED_CREDENTIALS: bool = decouple.config("IS_ALLOWED_CREDENTIALS", cast=bool) 
 
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",  # React default port
@@ -36,7 +37,8 @@ class BackendBaseSettings(BaseSettings):
     ALLOWED_HEADERS: list[str] = ["*"]
 
     class Config:
-        env_file = f"{ROOT_DIR}/.env"
+        # env_file = f"{ROOT_DIR}/.env"
+        env_file = None
 
 
 settings = BackendBaseSettings()

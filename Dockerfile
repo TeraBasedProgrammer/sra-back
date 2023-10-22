@@ -13,6 +13,4 @@ COPY ./app ./app
 
 COPY ./migrations ./migrations 
 
-ENTRYPOINT [ "./entrypoint.sh" ]
-
 EXPOSE 8000

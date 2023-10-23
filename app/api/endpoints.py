@@ -4,9 +4,8 @@ from app.api.routes.attempts import router as attempt_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.companies import router as company_router
 from app.api.routes.quizzes import router as quiz_router
-from app.api.routes.users import router as user_router
 from app.api.routes.user_profile import router as profile_router
-
+from app.api.routes.users import router as user_router
 
 router = APIRouter()
 

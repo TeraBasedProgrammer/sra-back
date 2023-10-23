@@ -61,7 +61,7 @@ LOGGING_CONFIG = {
     "formatters": {
         "default": {
             "()": "app.config.logs.log_config.ColorizedFormatter",
-            "fmt": "%(asctime)s | %(levelprefix)s | %(funcName)s | %(message)s", 
+            "fmt": "%(asctime)s | %(levelprefix)s | %(funcName)s | %(message)s",
             "use_colors": True,
         },
     },
@@ -74,9 +74,9 @@ LOGGING_CONFIG = {
     },
     "loggers": {
         "main_logger": {
-            "handlers": ["default"], 
+            "handlers": ["default"],
             "level": settings.LOGGING_LEVEL,
-            "propagate": False
+            "propagate": False,
         },
     },
 }

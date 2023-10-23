@@ -43,17 +43,18 @@ class AuthHandler:
                 status.HTTP_401_UNAUTHORIZED, detail="Signature has expired"
             )
         except jwt.InvalidTokenError:
-            # If token doesn't have the default structure, 
+            # If token doesn't have the default structure,
             # funcion delegates token verification to the auth0 jwt validator
             auth0_decoder = get_auth0_token_validator(token)
             decoded_data = await auth0_decoder.verify()
             if decoded_data:
                 return decoded_data
-            
+
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
 def get_auth_handler() -> AuthHandler:
     return AuthHandler()
+
 
 auth_handler: AuthHandler = get_auth_handler()

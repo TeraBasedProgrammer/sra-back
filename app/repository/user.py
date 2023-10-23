@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from starlette import status
 
+from app.api.dependencies.repository import get_repository
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser
 from app.models.db.quizzes import Quiz
@@ -126,4 +126,6 @@ class UserRepository(BaseRepository):
                     "User with is email has already been registered. Try to register with another email"
                 ),
             )
-        
+
+
+user_repository: UserRepository = get_repository(UserRepository)

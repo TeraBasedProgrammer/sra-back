@@ -1,16 +1,14 @@
 import logging
 import logging.config
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from fastapi_pagination.utils import disable_installed_extensions_check
 
-from app.config.settings.base import settings
-from app.config.logs.log_config import LOGGING_CONFIG
 from app.api.endpoints import router
-
+from app.config.logs.log_config import LOGGING_CONFIG
+from app.config.settings.base import settings
 
 # Set up logging configuration
 logging.config.dictConfig(LOGGING_CONFIG)

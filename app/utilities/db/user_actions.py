@@ -1,12 +1,12 @@
 from typing import Any, Optional
 
-from app.api.dependencies.repository import get_repository
 from app.repository.user import UserRepository
 
 
-async def create_user_or_skip(user_data: dict[str, bool]):
-    user_crud: UserRepository = get_repository(UserRepository)
-    new_user: Optional[dict[str, Any]] = await user_crud.error_or_create(
+async def create_user_or_skip(
+    user_repository: UserRepository, user_data: dict[str, bool]
+) -> Optional[dict[str, Any]]:
+    new_user: Optional[dict[str, Any]] = await user_repository.error_or_create(
         user_data["email"]
     )
 

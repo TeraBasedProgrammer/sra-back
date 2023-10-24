@@ -2,9 +2,8 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.dependencies.auth_wrapper import auth_wrapper
+from app.api.dependencies.user import get_current_user_id
 from app.api.dependencies.repository import get_repository
-from app.api.dependencies.session import get_async_session
 from app.config.logs.logger import logger
 from app.models.schemas.auth import UserLogin, UserSignUp
 from app.repository.user import UserRepository
@@ -72,5 +71,5 @@ async def login(
 
 
 @router.get("/")
-async def test(auth=Depends(auth_wrapper)):
-    return {"something": 123}
+async def test(current_user_id=Depends(get_current_user_id)):
+    return {"something": current_user_id}

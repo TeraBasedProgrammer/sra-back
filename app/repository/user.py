@@ -86,13 +86,6 @@ class UserRepository(BaseRepository):
         logger.debug(f'Successfully deleted user "{result}" from the database')
         return result
 
-    async def get_current_user_id(self, auth) -> int:
-        current_user = (
-            await self.get_user_by_email(auth["email"]) if not auth.get("id") else None
-        )
-        current_user_id = auth.get("id") if not current_user else current_user.id
-        return current_user_id
-
     async def create_or_skip(self, user_email: str) -> None:
         """Verifies that user with provided email wasn't registered using login
         and password before and creates new one if wasn't"""

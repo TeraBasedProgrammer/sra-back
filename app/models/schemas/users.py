@@ -9,6 +9,7 @@ from starlette import status
 
 from app.config.logs.logger import logger
 from app.models.db.companies import RoleEnum
+from app.models.schemas.tags import TagSchema
 
 
 class UserBase(BaseModel):
@@ -33,9 +34,9 @@ class UserBase(BaseModel):
 class UserSchema(UserBase):
     id: int
     registered_at: datetime
-    auth0_registered: Optional[bool]
     role: Optional[RoleEnum] = Field(None, nullable=True)
-    overall_avg_score: Decimal
+    average_score: Decimal
+    tags: list[TagSchema]
 
     class Config:
         from_attributes = True

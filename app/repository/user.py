@@ -93,7 +93,7 @@ class UserRepository(BaseRepository):
         current_user_id = auth.get("id") if not current_user else current_user.id
         return current_user_id
 
-    async def error_or_create(self, user_email: str) -> None:
+    async def create_or_skip(self, user_email: str) -> None:
         """Verifies that user with provided email wasn't registered using login
         and password before and creates new one if wasn't"""
         logger.info("Verifying user registration type")
@@ -110,22 +110,12 @@ class UserRepository(BaseRepository):
                 )
             )
             return new_user
-        if user_existing_object.auth0_registered:
+        else:
             logger.info(
                 "User with provided email has been registered using Auth0, pass"
             )
             return
-        # TODO: Remove this feature
-        if not user_existing_object.auth0_registered:
-            logger.warning(
-                "Error: user with provided email has been registered using logging-password way"
-            )
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper(
-                    "User with is email has already been registered. Try to register with another email"
-                ),
-            )
+        
 
 
 user_repository: UserRepository = get_repository(UserRepository)

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies.user import get_current_user_id
 from app.api.dependencies.repository import get_repository
-from app.repository.user import UserRepository
+from app.api.dependencies.user import get_current_user_id
 from app.config.logs.logger import logger
 from app.models.schemas.company_user import UserFullSchema
+from app.repository.user import UserRepository
 
 router = APIRouter(
     prefix="/profile",

@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ~/code
+cd ~/code/sra-back
 docker compose up -d

@@ -22,6 +22,7 @@ jobs:
       with:
         switches: -avzr --delete
         path: ./*
+        rsh: docker compose up -d
         remote-path: /home/ubuntu/code
         remote_host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
         remote_user: ubuntu

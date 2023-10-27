@@ -17,8 +17,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Run docker compose
-      run: docker compose up -d
+    - name: build
+      uses: burnett01/rsync-deployments@5.1
+      with:
+        switches: -avzr --delete
+        remote-path: /home/ubuntu/code
+        remote_host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
+        remote_user: ubuntu
+        remote_key: "${{ secrets.AWS_SSH }}"
     # - name: Configure AWS credentials
     #   uses: aws-actions/configure-aws-credentials@v1
     #   with:

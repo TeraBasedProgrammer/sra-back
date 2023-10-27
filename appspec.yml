@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/code
+    destination: /home/ubuntu/code/sra-back
 permissions:
-  - object: /home/ubuntu/code
+  - object: /home/ubuntu/code/sra-back
     owner: ubuntu
     group: ubuntu
 hooks:

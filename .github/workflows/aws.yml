@@ -4,34 +4,32 @@ on:
   push:
     branches: [ "develop" ]
 
-env:
-  AWS_REGION: eu-central-1
-
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: development
 
     steps:
-    - name: Checkout
+    - name: checkout
       uses: actions/checkout@v3
 
     - name: build
-      uses: burnett01/rsync-deployments@5.1
+      uses: isbang/compose-action@v1.5.1
       with:
-        switches: -avzr --delete
-        path: ./*
-        rsh: docker compose up -d
-        remote_path: /home/ubuntu/code
-        remote_host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
-        remote_user: ubuntu
-        remote_key: "${{ secrets.AMAZON_SSH }}"
-
-
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@v1
+        compose-file: "./docker-compose.yaml"
+      env:
+        POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+        POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
+        POSTGRES_HOST: "${{ secrets.POSTGRES_HOST }}"
+        POSTGRES_PORT: "${{ secrets.POSTGRES_PORT }}"
+        POSTGRES_DB: "${{ secrets.POSTGRES_DB }}"
+        
+    # - name: build
+    #   uses: burnett01/rsync-deployments@5.1
     #   with:
-    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws-region: ${{ env.AWS_REGION }}
+    #     switches: -avzr --delete
+    #     path: ./*
+    #     remote_path: /home/ubuntu/code
+    #     remote_host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
+    #     remote_user: ubuntu
+    #     remote_key: "${{ secrets.AMAZON_SSH }}"

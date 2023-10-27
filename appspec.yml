@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/code
+permissions:
+  - object: /home/ubuntu/code
+    owner: ubuntu
+    group: ubuntu
+hooks:
+  ApplicationStart:
+    - location: codedeploy-scripts/start.sh
+      timeout: 300
+      runas: ubuntu

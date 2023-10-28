@@ -34,7 +34,7 @@ class CompanyUser(Base):
         ForeignKey("companies.id", ondelete="CASCADE"), primary_key=True
     )
     user_id = Column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
-    role = Column(Enum(RoleEnum), nullable=False)
+    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.Owner)
 
     users = relationship("User", back_populates="companies", lazy="subquery")
     companies = relationship("Company", back_populates="users", lazy="subquery")

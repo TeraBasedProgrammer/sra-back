@@ -13,17 +13,25 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
 
-    - name: build
-      uses: isbang/compose-action@v1.5.1
+    - name: copy files to ec2
+      uses: appleboy/scp-action@master
       with:
-        compose-file: "./docker-compose.yaml"
-      env:
-        POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
-        POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
-        POSTGRES_HOST: "${{ secrets.POSTGRES_HOST }}"
-        POSTGRES_PORT: "${{ secrets.POSTGRES_PORT }}"
-        POSTGRES_DB: "${{ secrets.POSTGRES_DB }}"
-        
+        host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
+        username: ubuntu
+        key: "${{ secrets.AMAZON_SSH }}"
+        source: .
+        target: /home/ubuntu/code
+
+    - name: execute remote commands
+      uses: appleboy/ssh-action@master
+      with: 
+        host: ec2-3-68-94-147.eu-central-1.compute.amazonaws.com
+        username: ubuntu
+        key: "${{ secrets.AMAZON_SSH }}"
+        script: |
+          cd /home/ubuntu/code
+          docker compose -f docker-compose-prod.yaml up -d
+ 
     # - name: build
     #   uses: burnett01/rsync-deployments@5.1
     #   with:

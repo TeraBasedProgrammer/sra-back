@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from fastapi import Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -13,7 +13,7 @@ from app.utilities.db.user_actions import create_user_or_skip
 async def auth_wrapper(
     auth: HTTPAuthorizationCredentials = Security(HTTPBearer()),
     user_repository=Depends(get_repository(UserRepository)),
-) -> Optional[dict[str, bool]]:
+) -> Optional[dict[str, Any]]:
     user_data = await auth_handler.decode_token(auth.credentials)
 
     # Create new user (or skip if it exists) if token is received from Auth0

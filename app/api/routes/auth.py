@@ -1,11 +1,9 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies.auth_wrapper import auth_wrapper
+from app.api.dependencies.user import get_current_user_id
 from app.api.dependencies.repository import get_repository
-from app.api.dependencies.session import get_async_session
 from app.config.logs.logger import logger
 from app.models.schemas.auth import UserLogin, UserSignUp
 from app.repository.user import UserRepository
@@ -17,11 +15,11 @@ router = APIRouter(
 )
 
 
-@router.post("/signup/", response_model=Optional[Dict[str, Any]], status_code=201)
+@router.post("/signup/", response_model=Optional[dict[str, Any]], status_code=201)
 async def signup(
     user: UserSignUp,
     user_crud: UserRepository = Depends(get_repository(UserRepository)),
-) -> Optional[Dict[str, str]]:
+) -> Optional[dict[str, str]]:
     logger.info(f"Creating new User instance")
 
     user_existing_object = await user_crud.get_user_by_email(user.email)
@@ -42,7 +40,7 @@ async def signup(
 async def login(
     user_data: UserLogin,
     user_crud: UserRepository = Depends(get_repository(UserRepository)),
-) -> Optional[Dict[str, str]]:
+) -> Optional[dict[str, str]]:
     logger.info(f'Login attempt with email "{user_data.email}"')
 
     user_existing_object = await user_crud.get_user_by_email(user_data.email)
@@ -73,5 +71,5 @@ async def login(
 
 
 @router.get("/")
-async def test(auth=Depends(auth_wrapper)):
-    return {"something": 123}
+async def test(current_user_id=Depends(get_current_user_id)):
+    return {"something": current_user_id}

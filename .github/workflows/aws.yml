@@ -30,7 +30,7 @@ jobs:
         key: "${{ secrets.AMAZON_SSH }}"
         script: |
           cd /home/ubuntu/code
-          docker compose -f docker-compose-prod.yaml up -d
+          docker compose -f docker-compose-prod.yaml --env-file ./.env.prod up -d
  
     # - name: build
     #   uses: burnett01/rsync-deployments@5.1

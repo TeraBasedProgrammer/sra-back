@@ -89,6 +89,14 @@ class UserRepository(BaseRepository):
             logger.debug(f'Retrieved user id by email "{email}": "{id}"')
         return result
 
+    async def exists_by_id(self, user_id: int):
+        query = select(User).where(User.id == user_id)
+        return await self.exists(query)
+
+    async def exists_by_email(self, email: EmailStr):
+        query = select(User).where(User.email == email)
+        return await self.exists(query)
+
     async def update_user(
         self, user_id: int, user_data: UserUpdateRequest
     ) -> Optional[UserSchema]:

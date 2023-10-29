@@ -21,14 +21,14 @@ class BaseRepository:
         await self.async_session.commit()
         return new_instance
     
-    async def exists(self, query: Select):
+    async def exists(self, query: Select) -> bool:
         query = query.with_only_columns(self.model.id)
         response = await self.async_session.execute(query)
 
         result = response.first()
         return bool(result)
     
-    async def get_one(self, query: Select):
+    async def get_instance(self, query: Select):
         response = await self.async_session.execute(query)
         result = response.first()
         return result

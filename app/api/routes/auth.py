@@ -20,7 +20,7 @@ async def signup(
 ) -> UserSignUpOutput:
     logger.info(f"Creating new User instance")
 
-    user_existing_object = await user_crud.get_user_by_email(user_data.email)
+    user_existing_object = await user_crud.exists_by_email(user_data.email)
     if user_existing_object:
         logger.warning(
             f'Validation error: User with email "{user_data.email}" already exists'

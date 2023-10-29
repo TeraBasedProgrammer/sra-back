@@ -104,5 +104,4 @@ cov.html
 Makefile
 
 codecov.yaml
-.github
 .pre-commit-config.yaml

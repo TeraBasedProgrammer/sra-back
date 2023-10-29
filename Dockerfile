@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /code
 
-COPY ["./requirements.txt", "./pyproject.toml", "./alembic.ini",  "./"]
+COPY ["./requirements.txt", "./pyproject.toml", "./alembic.ini", "./"]
 
 RUN pip install --no-cache-dir -r requirements.txt  
 
@@ -13,4 +13,9 @@ COPY ./app ./app
 
 COPY ./migrations ./migrations 
 
+COPY ./entrypoint.sh .
+RUN chmod +x /code/entrypoint.sh
+
 EXPOSE 8000
+
+ENTRYPOINT [ "/code/entrypoint.sh" ]

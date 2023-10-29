@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, Field
 from starlette import status
 
 from app.config.logs.logger import logger
@@ -42,6 +42,12 @@ class UserSchema(UserBase):
     class Config:
         from_attributes = True
         populate_by_name = True
+
+
+class UserCreate(UserBase):
+    auth0_registered: bool = Field(default=False)
+    companies: list = Field(default=[])
+    password: str
 
 
 class UserUpdateRequest(UserBase):

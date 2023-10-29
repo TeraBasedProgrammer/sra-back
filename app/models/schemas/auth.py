@@ -24,10 +24,6 @@ class UserSignUpInput(UserBase):
         return value
 
 
-class UserSignUpAuth0(UserSignUpInput):
-    auth0_registered: bool
-
-
 class UserSignUpOutput(BaseModel):
     id: int
     email: EmailStr

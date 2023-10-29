@@ -6,21 +6,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload, load_only
 
 from app.config.logs.logger import logger
-from app.models.db.companies import Company, CompanyUser
 from app.models.db.users import User
-from app.models.schemas.auth import UserSignUpAuth0, UserSignUpInput
-from app.models.schemas.users import (UpdateUserScore, UserSchema,
+from app.models.schemas.users import (UserCreate, UserSchema,
                                       UserUpdateRequest)
 from app.repository.base import BaseRepository
-from app.securities.authorization.auth_handler import auth_handler
-from app.utilities.db.model_crud import (create_model_instance,
-                                         delete_model_instance,
-                                         update_model_instance)
 from app.utilities.formatters.get_args import get_args
 
 
 class UserRepository(BaseRepository):
     """Data Access Layer for operating user info"""
+
+    model = User
 
     async def _get_user_data(self, sql_query) -> Any:
         logger.debug(f"Received data:\n{get_args()}")
@@ -29,20 +25,11 @@ class UserRepository(BaseRepository):
         result = data.unique().scalar_one_or_none()
         return result
 
-    async def create_user(
-        self, user_data: UserSignUpInput, auth0: bool = False
-    ) -> Dict[str, Any]:
+    async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:
         logger.debug(f"Received data:\nnew_user_data -> {user_data}")
-        new_user = await create_model_instance(self.async_session, User, user_data)
 
-        new_user.password = await auth_handler.get_password_hash(new_user.password)
-        new_user.companies = []
-        logger.debug(f'Enctypted the password: "{new_user.password[:10]}..."')
+        new_user: User = await self.create(user_data)
 
-        if auth0:
-            new_user.auth0_registered = True
-
-        await self.async_session.commit()
         logger.debug(f"Successfully inserted new user instance into the database")
         return {"id": new_user.id, "email": new_user.email}
 
@@ -56,8 +43,8 @@ class UserRepository(BaseRepository):
             logger.info(
                 "User with provided email hasn't been registered yet, creating new instance"
             )
-            new_user = await self.create_user(
-                user_data=UserSignUpAuth0(
+            new_user = await self.create(
+                user_data=UserCreate(
                     email=user_email,
                     password=f"pass{datetime.now().strftime('%Y%m%d%H%M%S')}",
                     auth0_registered=True,
@@ -79,10 +66,7 @@ class UserRepository(BaseRepository):
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         result: Optional[User] = await self._get_user_data(
             select(User)
-            .options(
-                joinedload(User.tags),
-                joinedload(User.companies)
-            )
+            .options(joinedload(User.tags), joinedload(User.companies))
             .where(User.id == user_id)
         )
         if result:
@@ -109,8 +93,8 @@ class UserRepository(BaseRepository):
         self, user_id: int, user_data: UserUpdateRequest
     ) -> Optional[UserSchema]:
         logger.debug(f"Received data:\nuser_data -> {user_data}")
-        updated_user = await update_model_instance(
-            self.async_session, User, user_id, user_data
+        updated_user = await self.update(
+            user_data
         )
 
         logger.debug(f'Successfully updatetd user instance "{user_id}"')
@@ -118,7 +102,7 @@ class UserRepository(BaseRepository):
 
     async def delete_user(self, user_id: int) -> Optional[int]:
         logger.debug(f'Received data:\nuser_id -> "{user_id}"')
-        result = await delete_model_instance(self.async_session, User, user_id)
+        result = await self.delete(user_id)
 
         logger.debug(f'Successfully deleted user "{result}" from the database')
         return result

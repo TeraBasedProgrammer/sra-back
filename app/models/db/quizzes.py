@@ -31,9 +31,9 @@ class Quiz(Base):
     start_time = Column(TIMESTAMP, nullable=True)
     end_time = Column(TIMESTAMP, nullable=True)
 
-    questions = relationship("Question", back_populates="quiz", lazy="joined")
-    attempts = relationship("Attempt", back_populates="quiz", lazy="joined")
-    tags = relationship("TagQuiz", back_populates="quizzes", lazy="joined")
+    questions = relationship("Question", back_populates="quiz", lazy="select")
+    attempts = relationship("Attempt", back_populates="quiz", lazy="select")
+    tags = relationship("TagQuiz", back_populates="quizzes", lazy="select")
 
     @property
     def questions_count(self) -> int:
@@ -51,8 +51,8 @@ class Question(Base):
     fully_created = Column(Boolean, nullable=False, default=False)
     type = Column(Enum(QuestionTypeEnum), nullable=False)
 
-    quiz = relationship("Quiz", back_populates="questions", lazy="joined")
-    answers = relationship("Answer", back_populates="question", lazy="joined")
+    quiz = relationship("Quiz", back_populates="questions", lazy="select")
+    answers = relationship("Answer", back_populates="question", lazy="select")
 
     __table_args__ = (UniqueConstraint("title", "quiz_id", name="_question_uc"),)
 
@@ -66,6 +66,6 @@ class Answer(Base):
     is_correct = Column(Boolean, nullable=False, default=False)
     question_id = Column(ForeignKey("questions.id", ondelete="CASCADE"))
 
-    question = relationship("Question", back_populates="answers", lazy="subquery")
+    question = relationship("Question", back_populates="answers", lazy="select")
 
     __table_args__ = (UniqueConstraint("title", "question_id", name="_answer_uc"),)

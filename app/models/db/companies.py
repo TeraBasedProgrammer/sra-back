@@ -22,7 +22,7 @@ class Company(Base):
     description = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow())
 
-    users = relationship("CompanyUser", back_populates="companies")
+    users = relationship("CompanyUser", back_populates="companies", lazy="select")
 
     def __repr__(self) -> str:
         return f"Company {self.title}"
@@ -36,5 +36,5 @@ class CompanyUser(Base):
     user_id = Column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.Owner)
 
-    users = relationship("User", back_populates="companies", lazy="subquery")
-    companies = relationship("Company", back_populates="users", lazy="subquery")
+    users = relationship("User", back_populates="companies", lazy="joined")
+    companies = relationship("Company", back_populates="users", lazy="joined")

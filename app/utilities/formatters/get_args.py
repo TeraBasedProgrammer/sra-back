@@ -14,10 +14,10 @@ def get_args(stack_depth: int = 2) -> str:
     stack = inspect.stack()
     caller_frame = stack[stack_depth][0]
     args, _, _, values = inspect.getargvalues(caller_frame)
-    
+
     printed_args = []
     for arg in args:
         if arg != "self":
-            printed_args.append(f'"{arg}" -> {values[arg]}') 
+            printed_args.append(f'"{arg}" -> {values[arg]}')
 
     return "\n".join(printed_args)

@@ -9,7 +9,7 @@ from app.config.logs.logger import logger
 from app.models.schemas.users import UserBase
 
 
-class UserSignUp(UserBase):
+class UserSignUpInput(UserBase):
     password: str
     name: Optional[str] = None
 
@@ -24,10 +24,19 @@ class UserSignUp(UserBase):
         return value
 
 
-class UserSignUpAuth0(UserSignUp):
+class UserSignUpAuth0(UserSignUpInput):
     auth0_registered: bool
 
 
-class UserLogin(BaseModel):
+class UserSignUpOutput(BaseModel):
+    id: int
+    email: EmailStr
+
+
+class UserLoginInput(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserLoginOutput(BaseModel):
+    token: str

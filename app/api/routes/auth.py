@@ -2,24 +2,22 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.dependencies.user import get_current_user_id
 from app.api.dependencies.repository import get_repository
 from app.config.logs.logger import logger
-from app.models.schemas.auth import UserLogin, UserSignUp
+from app.models.schemas.auth import (UserLoginInput, UserLoginOutput,
+                                     UserSignUpInput, UserSignUpOutput)
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 from app.utilities.formatters.error_wrapper import error_wrapper
 
-router = APIRouter(
-    prefix="/auth", tags=["Auth"], responses={404: {"description": "Not found"}}
-)
 
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
-@router.post("/signup/", response_model=Optional[dict[str, Any]], status_code=201)
+@router.post("/signup/", response_model=UserSignUpOutput, status_code=201)
 async def signup(
-    user: UserSignUp,
+    user: UserSignUpInput,
     user_crud: UserRepository = Depends(get_repository(UserRepository)),
-) -> Optional[dict[str, str]]:
+) -> UserSignUpOutput:
     logger.info(f"Creating new User instance")
 
     user_existing_object = await user_crud.get_user_by_email(user.email)
@@ -36,9 +34,11 @@ async def signup(
     return result
 
 
-@router.post("/login/")
+@router.post(
+    "/login/", response_model=UserLoginOutput,
+)
 async def login(
-    user_data: UserLogin,
+    user_data: UserLoginInput,
     user_crud: UserRepository = Depends(get_repository(UserRepository)),
 ) -> Optional[dict[str, str]]:
     logger.info(f'Login attempt with email "{user_data.email}"')
@@ -68,8 +68,3 @@ async def login(
         user_existing_object.id, user_data.email
     )
     return {"token": auth_token}
-
-
-@router.get("/")
-async def test(current_user_id=Depends(get_current_user_id)):
-    return {"something": current_user_id}

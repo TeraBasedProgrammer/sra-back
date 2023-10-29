@@ -10,10 +10,18 @@ from app.api.endpoints import router
 from app.config.logs.log_config import LOGGING_CONFIG
 from app.config.settings.base import settings
 
+tags_metadata = [
+    {
+        "name": "Auth",
+        "description": "Operations with user authentication and registration.",
+    },
+    {"name": "User profile", "description": "Operations with user profile."},
+]
+
 # Set up logging configuration
 logging.config.dictConfig(LOGGING_CONFIG)
 
-app = FastAPI()
+app = FastAPI(title="QuizApp", openapi_tags=tags_metadata)
 app.include_router(router)
 
 # Enable pagination in the app

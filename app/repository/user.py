@@ -11,7 +11,7 @@ from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser
 from app.models.db.quizzes import Quiz
 from app.models.db.users import User
-from app.models.schemas.auth import UserSignUp, UserSignUpAuth0
+from app.models.schemas.auth import UserSignUpAuth0, UserSignUpInput
 from app.models.schemas.users import (UpdateUserScore, UserSchema,
                                       UserUpdateRequest)
 from app.repository.base import BaseRepository
@@ -26,7 +26,7 @@ class UserRepository(BaseRepository):
     """Data Access Layer for operating user info"""
 
     async def create_user(
-        self, user_data: UserSignUp, auth0: bool = False
+        self, user_data: UserSignUpInput, auth0: bool = False
     ) -> Dict[str, Any]:
         logger.debug(f"Received data:\nnew_user_data -> {user_data}")
         new_user = await create_model_instance(self.async_session, User, user_data)
@@ -108,7 +108,6 @@ class UserRepository(BaseRepository):
                 "User with provided email has been registered using Auth0, pass"
             )
             return
-        
 
 
 user_repository: UserRepository = get_repository(UserRepository)

@@ -6,7 +6,6 @@ from app.api.routes.companies import router as company_router
 from app.api.routes.quizzes import router as quiz_router
 from app.api.routes.user_profile import router as profile_router
 from app.api.routes.users import router as user_router
-from app.utilities.formatters.error_wrapper import error_wrapper
 
 router = APIRouter()
 
@@ -15,14 +14,14 @@ responses = {
         "description": "Validation error",
         "content": {
             "application/json": {
-                "example": {"detail": error_wrapper("Validation error")}
+                "example": {"detail": "Validation error"}
             }
         },
     },
     403: {
         "description": "Permission error",
         "content": {
-            "application/json": {"example": {"detail": error_wrapper("Forbidden")}}
+            "application/json": {"example": {"detail": "Forbidden"}}
         },
     },
     422: {
@@ -41,7 +40,7 @@ responses = {
         "description": "Instance is not found",
         "content": {
             "application/json": {
-                "example": {"detail": error_wrapper("Instance is not found")}
+                "example": {"detail": "Instance is not found"}
             }
         },
     },

@@ -8,7 +8,6 @@ from app.models.schemas.auth import (UserLoginInput, UserLoginOutput,
                                      UserSignUpInput, UserSignUpOutput)
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
-from app.utilities.formatters.error_wrapper import error_wrapper
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -27,7 +26,7 @@ async def signup(
         )
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
-            detail=error_wrapper("User with this email already exists"),
+            detail="User with this email already exists",
         )
     result = await user_crud.create_user(user)
     logger.info(f"New user instance has been successfully created")
@@ -50,9 +49,7 @@ async def login(
         )
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
-            detail=error_wrapper(
-                "User with this email is not registered in the system"
-            ),
+            detail="User with this email is not registered in the system"
         )
 
     verify_password = await auth_handler.verify_password(
@@ -61,7 +58,7 @@ async def login(
     if not verify_password:
         logger.warning(f"Invalid password was provided")
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, detail=error_wrapper("Invalid password")
+            status.HTTP_400_BAD_REQUEST, detail="Invalid password"
         )
     logger.info(f'User "{user_data.email}" successfully logged in the system')
     auth_token = await auth_handler.encode_token(

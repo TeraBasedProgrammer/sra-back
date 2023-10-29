@@ -23,3 +23,4 @@ async def get_current_user(
 
     logger.info(f"Successfully returned current user info")
     return await UserFullSchema.from_model(current_user)
+    

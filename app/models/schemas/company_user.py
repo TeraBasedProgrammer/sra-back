@@ -6,7 +6,7 @@ from app.models.schemas.users import TagSchema, UserSchema
 
 
 class UserFullSchema(UserSchema):
-    companies: Optional[list[UserCompanySchema]] = []
+    companies: list[UserCompanySchema]
 
     @classmethod
     async def from_model(cls, user_model: User):

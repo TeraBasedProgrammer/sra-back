@@ -4,11 +4,10 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, field_validator
 from starlette import status
 
 from app.config.logs.logger import logger
-from app.models.db.companies import RoleEnum
 from app.models.schemas.tags import TagSchema
 
 
@@ -34,7 +33,9 @@ class UserBase(BaseModel):
 class UserSchema(UserBase):
     id: int
     registered_at: datetime
-    role: Optional[RoleEnum] = Field(None, nullable=True)
+
+    # Comment until bugs occur
+    # role: Optional[RoleEnum] = Field(None, nullable=True)
     average_score: Decimal
     tags: list[TagSchema]
 

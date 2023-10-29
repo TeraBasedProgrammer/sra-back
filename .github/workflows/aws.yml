@@ -30,4 +30,5 @@ jobs:
         key: "${{ secrets.AMAZON_SSH }}"
         script: |
           cd /home/ubuntu/code
+          docker compose down code-web-1
           docker compose -f docker-compose-prod.yaml --env-file ./.env.prod up -d

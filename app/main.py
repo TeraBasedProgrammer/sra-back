@@ -21,7 +21,7 @@ tags_metadata = [
 # Set up logging configuration
 logging.config.dictConfig(LOGGING_CONFIG)
 
-app = FastAPI(title="QuizApp", openapi_tags=tags_metadata)
+app = FastAPI(title="QuizApp1", openapi_tags=tags_metadata)
 app.include_router(router)
 
 # Enable pagination in the app

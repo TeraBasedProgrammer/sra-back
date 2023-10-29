@@ -1,19 +1,22 @@
 from typing import Any, Optional
 
-from fastapi import Depends, Security
+from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.api.dependencies.repository import get_repository
-from app.config.settings.base import settings
 from app.repository.user import UserRepository
-from app.securities.authorization.auth_handler import AuthHandler, auth_handler
+from app.securities.authorization.auth_handler import auth_handler
 from app.utilities.db.user_actions import create_user_or_skip
 
 
 async def auth_wrapper(
-    auth: HTTPAuthorizationCredentials = Security(HTTPBearer()),
+    auth: HTTPAuthorizationCredentials = Security(HTTPBearer(auto_error=False)),
     user_repository=Depends(get_repository(UserRepository)),
 ) -> Optional[dict[str, Any]]:
+    if not auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        )
     user_data = await auth_handler.decode_token(auth.credentials)
 
     # Create new user (or skip if it exists) if token is received from Auth0

@@ -9,6 +9,7 @@ from starlette import status
 
 from app.config.logs.logger import logger
 from app.models.schemas.tags import TagSchema
+from app.utilities.validators.user import validate_password
 
 
 class UserBase(BaseModel):
@@ -50,28 +51,25 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserUpdateRequest(UserBase):
+class UserUpdate(UserBase):
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
     password: Optional[str] = None
 
     @field_validator("password")
-    def validate_password(cls, value):
-        if not re.compile(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$").match(value):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Password should contain at least eight characters, at least one letter and one number",
-            )
-        return value
+    def validate(cls, value: str):
+        return validate_password(value)
 
-    @field_validator("email")
-    def validate_email(cls, value):
-        if value is not None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User email can't be changed, try again",
-            )
-        return value
+
+class PasswordResetInput(BaseModel):
+    old_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    def validate(cls, value: str):
+        return validate_password(value)
+    
+class PasswordResetOutput(BaseModel):
+    success: str = "The password was successfully reset"
 
 
 class DeletedInstanceResponse(BaseModel):

@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload, load_only
 
 from app.config.logs.logger import logger
 from app.models.db.users import User
-from app.models.schemas.users import UserCreate, UserSchema, UserUpdateRequest
+from app.models.schemas.users import UserCreate, UserSchema, UserUpdate
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -109,7 +109,7 @@ class UserRepository(BaseRepository):
 
     # TODO: test
     async def update_user(
-        self, user_id: int, user_data: UserUpdateRequest
+        self, user_id: int, user_data: UserUpdate
     ) -> Optional[UserSchema]:
         logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)

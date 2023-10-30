@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 import jwt
 from fastapi import HTTPException, Security
@@ -17,13 +17,13 @@ class AuthHandler:
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self.secret: str = settings.JWT_SECRET
 
-    async def get_password_hash(self, password: str) -> str:
+    def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
-    async def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return self.pwd_context.verify(plain_password, hashed_password, scheme="bcrypt")
 
-    async def encode_token(self, user_id: int, user_email: str) -> str:
+    def encode_token(self, user_id: int, user_email: str) -> str:
         # Initialize user_crud object to get user id once and put it in jwt payload
 
         payload = {

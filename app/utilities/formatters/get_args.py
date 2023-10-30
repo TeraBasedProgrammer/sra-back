@@ -1,7 +1,7 @@
 import inspect
 
 
-def get_args(stack_depth: int = 2) -> str:
+def get_args(stack_depth: int = 1) -> str:
     """Converts funtion parameters in log-fiendly form
 
     Args:

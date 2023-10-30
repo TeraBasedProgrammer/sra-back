@@ -18,7 +18,7 @@ class UserRepository(BaseRepository):
     model = User
 
     async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:
-        logger.debug(f"Received data:\nnew_user_data -> {user_data}")
+        logger.debug(f"Received data:\n{get_args(1)}")
 
         new_user: User = await self.create(user_data)
 
@@ -28,6 +28,7 @@ class UserRepository(BaseRepository):
     async def create_or_skip(self, user_email: str) -> None:
         """Verifies that user with provided email wasn't registered using login
         and password before and creates new one if wasn't"""
+        logger.debug(f"Received data:\n{get_args()}")
 
         logger.info("Verifying user registration type")
         user_existing_object = await self.exists_by_email(user_email)
@@ -57,6 +58,8 @@ class UserRepository(BaseRepository):
         return result.unique().scalars().all()
 
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
+        logger.debug(f"Received data:\n{get_args()}")
+
         query = (
             select(User)
             .options(joinedload(User.tags), joinedload(User.companies))
@@ -68,6 +71,8 @@ class UserRepository(BaseRepository):
         return result
 
     async def get_user_by_email(self, email: EmailStr) -> Optional[User]:
+        logger.debug(f"Received data:\n{get_args()}")
+
         query = (
             select(User)
             .options(joinedload(User.tags), joinedload(User.companies))
@@ -80,6 +85,8 @@ class UserRepository(BaseRepository):
 
     # TODO: test
     async def get_user_id(self, email: EmailStr) -> Optional[int]:
+        logger.debug(f"Received data:\n{get_args()}")
+
         query = (
             select(User).where(User.email == email).with_only_columns(User.id)
         )
@@ -89,10 +96,14 @@ class UserRepository(BaseRepository):
         return result
 
     async def exists_by_id(self, user_id: int):
+        logger.debug(f"Received data:\n{get_args()}")
+
         query = select(User).where(User.id == user_id)
         return await self.exists(query)
 
     async def exists_by_email(self, email: EmailStr):
+        logger.debug(f"Received data:\n{get_args()}")
+
         query = select(User).where(User.email == email)
         return await self.exists(query)
 
@@ -100,7 +111,7 @@ class UserRepository(BaseRepository):
     async def update_user(
         self, user_id: int, user_data: UserUpdateRequest
     ) -> Optional[UserSchema]:
-        logger.debug(f"Received data:\nuser_data -> {user_data}")
+        logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)
 
         logger.debug(f'Successfully updatetd user instance "{user_id}"')
@@ -108,7 +119,7 @@ class UserRepository(BaseRepository):
 
     # TODO: test
     async def delete_user(self, user_id: int) -> Optional[int]:
-        logger.debug(f'Received data:\nuser_id -> "{user_id}"')
+        logger.debug(f"Received data:\n{get_args()}")
         result = await self.delete(user_id)
 
         logger.debug(f'Successfully deleted user "{result}" from the database')

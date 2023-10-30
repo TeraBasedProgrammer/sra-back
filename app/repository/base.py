@@ -30,7 +30,7 @@ class BaseRepository:
     
     async def get_instance(self, query: Select):
         response = await self.async_session.execute(query)
-        result = response.first()
+        result = response.unique().scalar_one_or_none()
         return result
 
     async def update(self, instance_id: int, model_data: Type[BaseModel]) -> Type[Base]:

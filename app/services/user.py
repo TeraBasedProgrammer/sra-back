@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
@@ -22,10 +20,10 @@ class UserService:
         user_existing_object = await self.user_repository.exists_by_email(user_data.email)
         if user_existing_object:
             logger.warning(
-                f'Validation error: User with email "{user_data.email}" already exists'
+                f'User with email "{user_data.email}" already exists'
             )
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_409_CONFLICT,
                 detail="User with this email already exists",
             )
         
@@ -49,7 +47,7 @@ class UserService:
                 f'User with email "{user_data.email}" is not registered in the system'
             )
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_404_NOT_FOUND,
                 detail="User with this email is not registered in the system",
             )
 

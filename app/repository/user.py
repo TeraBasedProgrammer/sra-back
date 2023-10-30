@@ -7,8 +7,7 @@ from sqlalchemy.orm import joinedload, load_only
 
 from app.config.logs.logger import logger
 from app.models.db.users import User
-from app.models.schemas.users import (UserCreate, UserSchema,
-                                      UserUpdateRequest)
+from app.models.schemas.users import UserCreate, UserSchema, UserUpdateRequest
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -38,19 +37,20 @@ class UserRepository(BaseRepository):
         and password before and creates new one if wasn't"""
 
         logger.info("Verifying user registration type")
-        user_existing_object = await self.get_user_by_email(user_email)
+        user_existing_object = await self.exists_by_email(user_email)
         if not user_existing_object:
             logger.info(
                 "User with provided email hasn't been registered yet, creating new instance"
             )
-            new_user = await self.create(
-                user_data=UserCreate(
+            new_user: User = await self.create(
+                UserCreate(
                     email=user_email,
                     password=f"pass{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    name=None,
                     auth0_registered=True,
                 )
             )
-            return new_user
+            return {"id": new_user.id, "email": new_user.email}
         else:
             logger.info(
                 "User with provided email has been registered using Auth0, pass"
@@ -101,9 +101,7 @@ class UserRepository(BaseRepository):
         self, user_id: int, user_data: UserUpdateRequest
     ) -> Optional[UserSchema]:
         logger.debug(f"Received data:\nuser_data -> {user_data}")
-        updated_user = await self.update(
-            user_data
-        )
+        updated_user = await self.update(user_data)
 
         logger.debug(f'Successfully updatetd user instance "{user_id}"')
         return updated_user

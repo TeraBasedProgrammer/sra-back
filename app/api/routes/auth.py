@@ -68,6 +68,7 @@ async def login(
     if not verify_password:
         logger.warning(f"Invalid password was provided")
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid password")
+    
     logger.info(f'User "{user_data.email}" successfully logged in the system')
     auth_token = await auth_handler.encode_token(
         user_existing_object.id, user_data.email

@@ -75,7 +75,9 @@ class UserRepository(BaseRepository):
 
     async def get_user_by_email(self, email: EmailStr) -> Optional[User]:
         result: Optional[User] = await self._get_user_data(
-            select(User).options(joinedload(User.companies)).where(User.email == email)
+            select(User)
+            .options(joinedload(User.tags), joinedload(User.companies))
+            .where(User.email == email)
         )
         if result:
             logger.debug(f'Retrieved user by email "{email}": "{result.id}"')

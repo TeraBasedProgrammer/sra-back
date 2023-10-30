@@ -51,13 +51,8 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
     name: Optional[str] = None
-    password: Optional[str] = None
-
-    @field_validator("password")
-    def validate(cls, value: str):
-        return validate_password(value)
 
 
 class PasswordResetInput(BaseModel):

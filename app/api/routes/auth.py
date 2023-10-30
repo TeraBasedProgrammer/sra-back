@@ -11,7 +11,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post(
     "/signup/",
-    description="Create new user account",
+    # description="Create new user account",
     response_model=UserSignUpOutput,
     status_code=201,
     responses=get_signup_responses(),
@@ -19,6 +19,9 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 async def signup(
     user_data: UserSignUpInput, user_service: UserService = Depends(get_user_service)
 ) -> UserSignUpOutput:
+    """
+    ### Register a new user
+    """
     return await user_service.register_user(user_data)
 
 
@@ -26,4 +29,7 @@ async def signup(
 async def login(
     user_data: UserLoginInput, user_service: UserService = Depends(get_user_service)
 ) -> UserLoginOutput:
+    """
+    ### Authenticate and retrieve a JWT token
+    """
     return await user_service.authenticate_user(user_data)

@@ -5,7 +5,8 @@ from app.models.db.users import User
 from app.models.schemas.auth import (UserLoginInput, UserLoginOutput,
                                      UserSignUpInput, UserSignUpOutput)
 from app.models.schemas.company_user import UserFullSchema
-from app.models.schemas.users import PasswordResetInput, UserCreate, PasswordResetOutput
+from app.models.schemas.users import (PasswordResetInput, PasswordResetOutput,
+                                      UserCreate, UserUpdate)
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 
@@ -59,15 +60,23 @@ class UserService:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid password")
 
         logger.info(f'User "{user_data.email}" successfully logged in the system')
-        auth_token = auth_handler.encode_token(
-            user_existing_object.id, user_data.email
-        )
+        auth_token = auth_handler.encode_token(user_existing_object.id, user_data.email)
         return {"token": auth_token}
 
     async def get_user_profile(self, current_user: User) -> UserFullSchema:
         logger.info(f"Successfully returned current user info")
 
         return await UserFullSchema.from_model(current_user)
+
+    async def update_user_profile(
+        self, current_user: User, data: UserUpdate
+    ) -> UserFullSchema:
+        logger.info(f'Updating user profile of the user "{current_user}"')
+
+        updated_user = await self.user_repository.update_user(current_user.id, data)
+
+        logger.info(f'"{current_user}" profile was successfully updated')
+        return await self.get_user_profile(updated_user)
 
     async def reset_password(
         self, current_user: User, data: PasswordResetInput
@@ -80,7 +89,7 @@ class UserService:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, detail="Invalid old password"
             )
-        
+
         # Validate the new password does not match the old password
         if auth_handler.verify_password(data.new_password, current_user.password):
             logger.warning("Error: New password and old password are the same")
@@ -94,4 +103,3 @@ class UserService:
         logger.info(f"The password was successfully updated")
 
         return PasswordResetOutput
-

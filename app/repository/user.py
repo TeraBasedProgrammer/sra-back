@@ -110,7 +110,7 @@ class UserRepository(BaseRepository):
     # TODO: test
     async def update_user(
         self, user_id: int, user_data: UserUpdate
-    ) -> Optional[UserSchema]:
+    ) -> User:
         logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)
 

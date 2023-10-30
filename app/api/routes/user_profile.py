@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_user_service
 from app.api.dependencies.user import get_current_user
-from app.api.docs.user_profile import (get_profile_responses,
+from app.api.docs.user_profile import (get_edit_profile_responses,
+                                       get_profile_responses,
                                        get_reset_password_responses)
 from app.models.schemas.company_user import UserFullSchema
-from app.models.schemas.users import PasswordResetInput, PasswordResetOutput
+from app.models.schemas.users import (PasswordResetInput, PasswordResetOutput,
+                                      UserUpdate)
 from app.services.user import UserService
 
 router = APIRouter(
@@ -17,23 +19,32 @@ router = APIRouter(
 @router.get(
     "/",
     response_model=UserFullSchema,
-    response_model_exclude_none=True,
     responses=get_profile_responses(),
 )
 async def get_user_profile(
     current_user: int = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ) -> UserFullSchema:
+    """
+    ### Retrieve user profile data
+    """
     return await user_service.get_user_profile(current_user)
 
 
-@router.patch("/edit", response_model=None)
+@router.patch(
+    "/edit",
+    response_model=UserFullSchema,
+    responses=get_edit_profile_responses(),
+)
 async def edit_user_profile(
-    data: None,
+    data: UserUpdate,
     current_user: int = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
-) -> None:
-    return await user_service.update_user_profile(current_user)
+) -> UserFullSchema:
+    """
+    ### Edit user profile data
+    """
+    return await user_service.update_user_profile(current_user, data)
 
 
 @router.patch(
@@ -46,4 +57,7 @@ async def reset_password(
     current_user: int = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ) -> PasswordResetOutput:
+    """
+    ### Reset user password
+    """
     return await user_service.reset_password(current_user, data)

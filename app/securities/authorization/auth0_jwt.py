@@ -36,7 +36,7 @@ class Auth0TokenValidator:
                 audience=settings.AUTH0_API_AUDIENCE,
                 issuer=settings.AUTH0_ISSUER,
             )
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             raise HTTPException(
                 status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token or its signature has expired",

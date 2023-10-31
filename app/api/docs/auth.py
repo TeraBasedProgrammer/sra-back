@@ -47,43 +47,41 @@ def get_signup_responses() -> dict[int, Any]:
 
 
 def get_login_responses() -> dict[int, Any]:
-    responses: dict[int, Any] = (
-        {
-            status.HTTP_404_NOT_FOUND: {
-                "description": "User email is not registered in the system",
-                "content": {
-                    "application/json": {
-                        "example": {
-                            "detail": "User with this email is not registered in the system"
-                        }
+    responses: dict[int, Any] = {
+        status.HTTP_404_NOT_FOUND: {
+            "description": "User email is not registered in the system",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User with this email is not registered in the system"
                     }
-                },
+                }
             },
-            status.HTTP_400_BAD_REQUEST: {
-                "description": "Invalid password",
-                "content": {
-                    "application/json": {"example": {"detail": "Invalid password"}}
-                },
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid password",
+            "content": {
+                "application/json": {"example": {"detail": "Invalid password"}}
             },
-            status.HTTP_422_UNPROCESSABLE_ENTITY: {
-                "description": "One or more fields were passed incorrectly",
-                "content": {
-                    "application/json": {
-                        "example": {
-                            "detail": [
-                                {
-                                    "type": "string_type",
-                                    "loc": ["body", "email"],
-                                    "msg": "Input should be a valid string",
-                                    "input": 0,
-                                    "url": "https://errors.pydantic.dev/2.1.2/v/string_type",
-                                }
-                            ]
-                        }
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "One or more fields were passed incorrectly",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "type": "string_type",
+                                "loc": ["body", "email"],
+                                "msg": "Input should be a valid string",
+                                "input": 0,
+                                "url": "https://errors.pydantic.dev/2.1.2/v/string_type",
+                            }
+                        ]
                     }
-                },
+                }
             },
-        }
-    )
+        },
+    }
 
     return responses

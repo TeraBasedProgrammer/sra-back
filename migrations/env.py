@@ -1,21 +1,19 @@
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
+from app.models.database import DATABASE_URL, Base
+from app.models.db.attempts import Attempt
+from app.models.db.companies import Company, CompanyUser
 
 # Models
 from app.models.db.quizzes import Answer, Question, Quiz
-from app.models.db.companies import CompanyUser, Company
-from app.models.db.users import User, Tag, TagQuiz, TagUser
-from app.models.db.attempts import Attempt
-
-from app.models.database import Base, DATABASE_URL
-
+from app.models.db.users import Tag, TagQuiz, TagUser, User
 
 load_dotenv(".env")
 

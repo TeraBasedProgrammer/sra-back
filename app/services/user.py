@@ -2,11 +2,19 @@ from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
 from app.models.db.users import User
-from app.models.schemas.auth import (UserLoginInput, UserLoginOutput,
-                                     UserSignUpInput, UserSignUpOutput)
+from app.models.schemas.auth import (
+    UserLoginInput,
+    UserLoginOutput,
+    UserSignUpInput,
+    UserSignUpOutput,
+)
 from app.models.schemas.company_user import UserFullSchema
-from app.models.schemas.users import (PasswordResetInput, PasswordResetOutput,
-                                      UserCreate, UserUpdate)
+from app.models.schemas.users import (
+    PasswordResetInput,
+    PasswordResetOutput,
+    UserCreate,
+    UserUpdate,
+)
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 
@@ -16,7 +24,7 @@ class UserService:
         self.user_repository: UserRepository = user_repository
 
     async def register_user(self, user_data: UserSignUpInput) -> UserSignUpOutput:
-        logger.info(f"Creating new User instance")
+        logger.info("Creating new User instance")
 
         user_existing_object = await self.user_repository.exists_by_email(
             user_data.email
@@ -34,7 +42,7 @@ class UserService:
             UserCreate(**user_data.model_dump())
         )
 
-        logger.info(f"New user instance has been successfully created")
+        logger.info("New user instance has been successfully created")
         return result
 
     async def authenticate_user(self, user_data: UserLoginInput) -> UserLoginOutput:
@@ -56,7 +64,7 @@ class UserService:
             user_data.password, user_existing_object.password
         )
         if not verify_password:
-            logger.warning(f"Invalid password was provided")
+            logger.warning("Invalid password was provided")
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid password")
 
         logger.info(f'User "{user_data.email}" successfully logged in the system')
@@ -64,7 +72,7 @@ class UserService:
         return {"token": auth_token}
 
     async def get_user_profile(self, current_user: User) -> UserFullSchema:
-        logger.info(f"Successfully returned current user info")
+        logger.info("Successfully returned current user info")
 
         return await UserFullSchema.from_model(current_user)
 
@@ -100,6 +108,6 @@ class UserService:
         current_user.password = auth_handler.get_password_hash(data.new_password)
 
         await self.user_repository.save(current_user)
-        logger.info(f"The password was successfully updated")
+        logger.info("The password was successfully updated")
 
         return PasswordResetOutput

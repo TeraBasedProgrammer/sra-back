@@ -1,12 +1,19 @@
 import enum
 
-from sqlalchemy import (TIMESTAMP, Boolean, Column, Enum, ForeignKey, Integer,
-                        String, Text, UniqueConstraint)
+from sqlalchemy import (
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.models.database import Base
-
-from .attempts import Attempt
 
 
 class QuestionTypeEnum(enum.Enum):

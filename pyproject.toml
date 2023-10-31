@@ -29,8 +29,8 @@ exclude = '''
 include = '\.pyi?$'
 line-length = 88
 
-
 [tool.isort]
+profile="black"
 skip = [
     ".coverage",
     "coverage/*",

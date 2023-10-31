@@ -33,11 +33,7 @@ def get_reset_password_responses() -> dict[int, Any]:
         status.HTTP_409_CONFLICT: {
             "description": "The new password matches the old one",
             "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Matching passwords"
-                    }
-                }
+                "application/json": {"example": {"detail": "Matching passwords"}}
             },
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
@@ -73,9 +69,7 @@ def get_edit_profile_responses() -> dict[int, Any]:
         },
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid name string",
-            "content": {
-                "application/json": {"example": {"detail": "Invalid name"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Invalid name"}}},
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
             "description": "One or more fields were passed incorrectly",

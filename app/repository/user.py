@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import EmailStr
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy.orm import joinedload
 
 from app.config.logs.logger import logger
 from app.models.db.users import User
-from app.models.schemas.users import UserCreate, UserSchema, UserUpdate
+from app.models.schemas.users import UserCreate, UserUpdate
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -22,7 +22,7 @@ class UserRepository(BaseRepository):
 
         new_user: User = await self.create(user_data)
 
-        logger.debug(f"Successfully inserted new user instance into the database")
+        logger.debug("Successfully inserted new user instance into the database")
         return {"id": new_user.id, "email": new_user.email}
 
     async def create_or_skip(self, user_email: str) -> None:
@@ -87,9 +87,7 @@ class UserRepository(BaseRepository):
     async def get_user_id(self, email: EmailStr) -> Optional[int]:
         logger.debug(f"Received data:\n{get_args()}")
 
-        query = (
-            select(User).where(User.email == email).with_only_columns(User.id)
-        )
+        query = select(User).where(User.email == email).with_only_columns(User.id)
         result: Optional[User] = await self.get_instance(query)
         if result:
             logger.debug(f'Retrieved user id by email "{email}": "{result.id}"')
@@ -108,9 +106,7 @@ class UserRepository(BaseRepository):
         return await self.exists(query)
 
     # TODO: test
-    async def update_user(
-        self, user_id: int, user_data: UserUpdate
-    ) -> User:
+    async def update_user(self, user_id: int, user_data: UserUpdate) -> User:
         logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)
 

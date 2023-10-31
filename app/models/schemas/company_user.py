@@ -1,5 +1,3 @@
-from typing import Optional
-
 from app.models.db.users import User
 from app.models.schemas.companies import UserCompanySchema
 from app.models.schemas.users import TagSchema, UserSchema

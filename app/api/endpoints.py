@@ -7,7 +7,6 @@ from app.api.routes.quizzes import router as quiz_router
 from app.api.routes.user_profile import router as profile_router
 from app.api.routes.users import router as user_router
 
-
 router = APIRouter()
 
 router.include_router(router=attempt_router)

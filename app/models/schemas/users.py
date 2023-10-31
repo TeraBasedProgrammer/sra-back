@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, field_validator, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from starlette import status
 
 from app.config.logs.logger import logger
@@ -22,7 +22,7 @@ class UserBase(BaseModel):
             return value
         if not re.compile(r"^[a-zA-Z\- ]+$").match(value):
             logger.warning(
-                f"Validation error: 'name' field contains restricted characters"
+                "Validation error: 'name' field contains restricted characters"
             )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -62,7 +62,8 @@ class PasswordResetInput(BaseModel):
     @field_validator("new_password")
     def validate(cls, value: str):
         return validate_password(value)
-    
+
+
 class PasswordResetOutput(BaseModel):
     success: str = "The password was successfully reset"
 

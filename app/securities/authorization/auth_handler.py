@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional
 
 import jwt
-from fastapi import HTTPException, Security
+from fastapi import HTTPException
 from fastapi.security import HTTPBearer
 from passlib.context import CryptContext
 from starlette import status

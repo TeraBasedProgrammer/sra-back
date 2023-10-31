@@ -2,8 +2,8 @@ from typing import Any, Type
 
 from pydantic import BaseModel
 from sqlalchemy import delete, update
-from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import Select
 
 from app.models.database import Base
 
@@ -20,14 +20,14 @@ class BaseRepository:
 
         await self.async_session.commit()
         return new_instance
-    
+
     async def exists(self, query: Select) -> bool:
         query = query.with_only_columns(self.model.id)
         response = await self.async_session.execute(query)
 
         result = response.first()
         return bool(result)
-    
+
     async def get_instance(self, query: Select):
         response = await self.async_session.execute(query)
         result = response.unique().scalar_one_or_none()
@@ -51,12 +51,16 @@ class BaseRepository:
         return res.unique().scalar_one()
 
     async def delete(self, instance_id: int) -> int:
-        query = delete(self.model).where(self.model.id == instance_id).returning(self.model.id)
+        query = (
+            delete(self.model)
+            .where(self.model.id == instance_id)
+            .returning(self.model.id)
+        )
 
         result = (await self.async_session.execute(query)).scalar_one()
         await self.async_session.commit()
         return result
-    
+
     async def save(self, obj: Any):
         self.async_session.add(obj)
         await self.async_session.commit()

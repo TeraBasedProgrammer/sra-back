@@ -1,8 +1,5 @@
-from typing import AsyncGenerator
-
 import redis.asyncio as rd
-from sqlalchemy.ext.asyncio import (AsyncAttrs, AsyncSession,
-                                    async_sessionmaker, create_async_engine)
+from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from app.config.settings.base import settings

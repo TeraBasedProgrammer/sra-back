@@ -13,6 +13,7 @@ class UserFullSchema(UserSchema):
             name=user_model.name,
             email=user_model.email,
             registered_at=user_model.registered_at,
+            phone_number=user_model.phone_number,
             average_score=user_model.average_score,
             tags=[
                 TagSchema(id=tag.tags.id, title=tag.tags.title)

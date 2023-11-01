@@ -2,6 +2,8 @@ from typing import Any
 
 from fastapi import status
 
+from app.utilities.formatters.http_error import validation_error_wrapper
+
 
 def get_profile_responses() -> dict[int, Any]:
     responses: dict[int, Any] = {
@@ -27,7 +29,13 @@ def get_reset_password_responses() -> dict[int, Any]:
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid old password",
             "content": {
-                "application/json": {"example": {"detail": "Invalid pld password"}}
+                "application/json": {
+                    "example": {
+                        "detail": validation_error_wrapper(
+                            "Invalid old password", "old_password"
+                        )
+                    }
+                }
             },
         },
         status.HTTP_409_CONFLICT: {
@@ -69,7 +77,13 @@ def get_edit_profile_responses() -> dict[int, Any]:
         },
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid name string",
-            "content": {"application/json": {"example": {"detail": "Invalid name"}}},
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": validation_error_wrapper("Invalid name", "name")
+                    }
+                }
+            },
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
             "description": "One or more fields were passed incorrectly",

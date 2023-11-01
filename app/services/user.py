@@ -17,6 +17,7 @@ from app.models.schemas.users import (
 )
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
+from app.utilities.formatters.http_error import validation_error_wrapper
 
 
 class UserService:
@@ -65,7 +66,10 @@ class UserService:
         )
         if not verify_password:
             logger.warning("Invalid password was provided")
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid password")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=validation_error_wrapper("Invalid password", "password"),
+            )
 
         logger.info(f'User "{user_data.email}" successfully logged in the system')
         auth_token = auth_handler.encode_token(user_existing_object.id, user_data.email)
@@ -95,7 +99,8 @@ class UserService:
         if not auth_handler.verify_password(data.old_password, current_user.password):
             logger.warning("Invalid old password was provided")
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, detail="Invalid old password"
+                status.HTTP_400_BAD_REQUEST,
+                detail=validation_error_wrapper("Invalid old password", "old_password"),
             )
 
         # Validate the new password does not match the old password

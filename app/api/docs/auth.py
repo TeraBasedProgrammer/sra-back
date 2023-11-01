@@ -2,6 +2,8 @@ from typing import Any
 
 from fastapi import status
 
+from app.utilities.formatters.http_error import validation_error_wrapper
+
 
 def get_signup_responses() -> dict[int, Any]:
     responses: dict[int, Any] = {
@@ -19,7 +21,11 @@ def get_signup_responses() -> dict[int, Any]:
             "description": "Input password has incorrect format",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Password has incorrect format"}
+                    "example": {
+                        "detail": validation_error_wrapper(
+                            "Password has incorrect format", "password"
+                        )
+                    }
                 }
             },
         },
@@ -61,7 +67,13 @@ def get_login_responses() -> dict[int, Any]:
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid password",
             "content": {
-                "application/json": {"example": {"detail": "Invalid password"}}
+                "application/json": {
+                    "example": {
+                        "detail": validation_error_wrapper(
+                            "Invalid password", "password"
+                        )
+                    }
+                }
             },
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {

@@ -27,7 +27,7 @@ def get_reset_password_responses() -> dict[int, Any]:
             },
         },
         status.HTTP_400_BAD_REQUEST: {
-            "description": "Invalid old password",
+            "description": "Field validation error",
             "content": {
                 "application/json": {
                     "example": {
@@ -76,7 +76,7 @@ def get_edit_profile_responses() -> dict[int, Any]:
             },
         },
         status.HTTP_400_BAD_REQUEST: {
-            "description": "Invalid name string",
+            "description": "Field validation error",
             "content": {
                 "application/json": {
                     "example": {

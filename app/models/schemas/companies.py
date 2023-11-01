@@ -8,12 +8,26 @@ from app.utilities.validators.text import validate_text
 
 
 class CompanyBase(BaseModel):
-    title: str = Field(max_length=100)
+    title: str = Field(max_length=25, min_length=5)
     description: str
 
     @field_validator("title")
+    @classmethod
     def validate_company_title(cls, value):
-        return validate_text(value)
+        return validate_text(value, "title")
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, value):
+        return validate_text(value, "description")
+
+
+class CompanyCreate(CompanyBase):
+    pass
+
+
+class CompanyCreateSuccess(BaseModel):
+    id: int
 
 
 class CompanySchema(CompanyBase):
@@ -26,7 +40,7 @@ class CompanySchema(CompanyBase):
         populate_by_name = True
 
 
-class UserCompanySchema(BaseModel):
+class UserCompanyM2m(BaseModel):
     id: int
     title: str
     role: Optional[RoleEnum] = Field(None, nullable=True)
@@ -38,4 +52,3 @@ class UserCompanySchema(BaseModel):
 class CompanyUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    is_hidden: Optional[bool] = None

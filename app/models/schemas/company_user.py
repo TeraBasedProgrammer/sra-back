@@ -1,10 +1,10 @@
 from app.models.db.users import User
-from app.models.schemas.companies import UserCompanySchema
+from app.models.schemas.companies import UserCompanyM2m
 from app.models.schemas.users import TagSchema, UserSchema
 
 
 class UserFullSchema(UserSchema):
-    companies: list[UserCompanySchema]
+    companies: list[UserCompanyM2m]
 
     @classmethod
     async def from_model(cls, user_model: User):
@@ -20,7 +20,7 @@ class UserFullSchema(UserSchema):
                 for tag in user_model.tags
             ],
             companies=[
-                UserCompanySchema(
+                UserCompanyM2m(
                     id=company.companies.id,
                     title=company.companies.title,
                     role=company.role,

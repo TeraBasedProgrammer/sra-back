@@ -20,10 +20,12 @@ class UserBase(BaseModel):
     )
 
     @field_validator("name")
+    @classmethod
     def validate_user_name(cls, value):
         return validate_name(value)
 
     @field_validator("phone_number")
+    @classmethod
     def validate_user_phone_number(cls, value):
         return validate_phone_number(value)
 
@@ -56,10 +58,12 @@ class UserUpdate(BaseModel):
     )
 
     @field_validator("name")
+    @classmethod
     def validate_user_name(cls, value):
         return validate_name(value)
 
     @field_validator("phone_number")
+    @classmethod
     def validate_user_phone_number(cls, value):
         return validate_phone_number(value)
 
@@ -72,6 +76,7 @@ class PasswordResetInput(BaseModel):
     new_password: str
 
     @field_validator("new_password")
+    @classmethod
     def validate(cls, value: str):
         return validate_password(value)
 

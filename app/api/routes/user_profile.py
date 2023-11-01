@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies.services import get_user_service
+from app.api.dependencies.services import get_company_service, get_user_service
 from app.api.dependencies.user import get_current_user
-from app.api.docs.user_profile import (get_edit_profile_responses,
-                                       get_profile_responses,
-                                       get_reset_password_responses)
+from app.api.docs.user_profile import (
+    get_edit_profile_responses,
+    get_profile_responses,
+    get_reset_password_responses,
+)
+from app.models.db.users import User
 from app.models.schemas.company_user import UserFullSchema
-from app.models.schemas.users import (PasswordResetInput, PasswordResetOutput,
-                                      UserUpdate)
+from app.models.schemas.users import PasswordResetInput, PasswordResetOutput, UserUpdate
+from app.services.company import CompanyService
 from app.services.user import UserService
 
 router = APIRouter(
@@ -22,13 +25,26 @@ router = APIRouter(
     responses=get_profile_responses(),
 )
 async def get_user_profile(
-    current_user: int = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ) -> UserFullSchema:
     """
     ### Retrieve user profile data
     """
     return await user_service.get_user_profile(current_user)
+
+
+@router.get(
+    "/companies",
+)
+async def get_user_companies(
+    current_user: User = Depends(get_current_user),
+    company_service: CompanyService = Depends(get_company_service),
+):
+    """
+    ### Retrieve all user companies
+    """
+    return await company_service.get_user_companies(current_user)
 
 
 @router.patch(

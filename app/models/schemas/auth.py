@@ -13,6 +13,7 @@ class UserSignUpInput(UserBase):
     password: str
 
     @field_validator("password")
+    @classmethod
     def validate_password(cls, value):
         if not re.compile(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$").match(value):
             logger.warning("Validation error: password doesn't match the pattern")

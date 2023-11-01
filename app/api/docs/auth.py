@@ -65,7 +65,7 @@ def get_login_responses() -> dict[int, Any]:
             },
         },
         status.HTTP_400_BAD_REQUEST: {
-            "description": "Invalid password",
+            "description": "Field validation error",
             "content": {
                 "application/json": {
                     "example": {
@@ -77,7 +77,7 @@ def get_login_responses() -> dict[int, Any]:
             },
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "description": "One or more fields were passed incorrectl | Field validation errory",
+            "description": "One or more fields were passed incorrectly | Field validation error",
             "content": {
                 "application/json": {
                     "example": {

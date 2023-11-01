@@ -7,6 +7,7 @@ class TagBaseSchema(BaseModel):
     title: str
 
     @field_validator("title")
+    @classmethod
     def validate_company_title(cls, value):
         return validate_text(value)
 

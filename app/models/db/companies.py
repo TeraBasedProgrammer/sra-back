@@ -30,6 +30,7 @@ class Company(Base):
 
 class CompanyUser(Base):
     __tablename__ = "company_user"
+
     company_id = Column(
         ForeignKey("companies.id", ondelete="CASCADE"), primary_key=True
     )

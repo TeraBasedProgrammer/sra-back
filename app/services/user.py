@@ -37,7 +37,7 @@ class UserService:
             )
 
         # Hashing input password
-        user_data.password = await auth_handler.get_password_hash(user_data.password)
+        user_data.password = auth_handler.get_password_hash(user_data.password)
         result = await self.user_repository.create_user(
             UserCreate(**user_data.model_dump())
         )

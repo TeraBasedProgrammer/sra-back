@@ -37,7 +37,7 @@ def get_reset_password_responses() -> dict[int, Any]:
             },
         },
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "description": "One or more fields were passed incorrectly",
+            "description": "One or more fields were passed incorrectly | Field validation error",
             "content": {
                 "application/json": {
                     "example": {

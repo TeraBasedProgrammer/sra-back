@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, field_validator
@@ -11,7 +10,6 @@ from app.models.schemas.users import UserBase
 
 class UserSignUpInput(UserBase):
     password: str
-    name: Optional[str] = None
 
     @field_validator("password")
     def validate_password(cls, value):

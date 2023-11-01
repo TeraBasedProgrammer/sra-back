@@ -1,34 +1,20 @@
-import re
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from starlette import status
 
-from app.config.logs.logger import logger
 from app.models.schemas.tags import TagSchema
-from app.utilities.validators.user import validate_password
+from app.utilities.validators.user import validate_name, validate_password
 
 
 class UserBase(BaseModel):
     email: EmailStr
-    name: Optional[str]
+    name: Optional[str] = Field(max_length=50, min_length=2, default=None)
 
     @field_validator("name")
     def validate_user_name(cls, value):
-        if not value:
-            return value
-        if not re.compile(r"^[a-zA-Z\- ]+$").match(value):
-            logger.warning(
-                "Validation error: 'name' field contains restricted characters"
-            )
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Name should contain only english letters",
-            )
-        return value
+        return validate_name(value)
 
 
 class UserSchema(UserBase):
@@ -52,7 +38,11 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(max_length=50, min_length=2, default=None)
+
+    @field_validator("name")
+    def validate_user_name(cls, value):
+        return validate_name(value)
 
 
 class PasswordResetInput(BaseModel):

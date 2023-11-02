@@ -78,7 +78,7 @@ class UserService:
     async def get_user_profile(self, current_user: User) -> UserFullSchema:
         logger.info("Successfully returned current user info")
 
-        return await UserFullSchema.from_model(current_user)
+        return UserFullSchema.from_model(current_user)
 
     async def update_user_profile(
         self, current_user: User, data: UserUpdate

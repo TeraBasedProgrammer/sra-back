@@ -23,6 +23,7 @@ router = APIRouter(
     "/",
     response_model=UserFullSchema,
     responses=get_profile_responses(),
+    response_model_exclude_none=True,
 )
 async def get_user_profile(
     current_user: User = Depends(get_current_user),
@@ -36,6 +37,7 @@ async def get_user_profile(
 
 @router.get(
     "/companies",
+    response_model_exclude_none=True,
 )
 async def get_user_companies(
     current_user: User = Depends(get_current_user),
@@ -50,6 +52,7 @@ async def get_user_companies(
 @router.patch(
     "/edit",
     response_model=UserFullSchema,
+    response_model_exclude_none=True,
     responses=get_edit_profile_responses(),
 )
 async def edit_user_profile(

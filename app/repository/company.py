@@ -1,3 +1,8 @@
+from typing import Optional
+
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
+
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser
 from app.models.db.users import User
@@ -12,7 +17,7 @@ class CompanyRepository(BaseRepository):
     async def create_company(
         self, company_data: CompanyCreate, current_user: User
     ) -> int:
-        logger.debug(f"Received data:\n{get_args(1)}")
+        logger.debug(f"Received data:\n{get_args()}")
 
         new_company: Company = await self.create(company_data)
 
@@ -25,8 +30,24 @@ class CompanyRepository(BaseRepository):
         logger.debug("Successfully inserted new company instance into the database")
         return new_company.id
 
+    async def exists_by_id(self, company_id: int):
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = select(Company).where(Company.id == company_id)
+        return await self.exists(query)
+
     async def get_user_companies(self) -> list[Company]:
         raise NotImplementedError()
 
-    async def get_company_by_id(self) -> Company:
-        raise NotImplementedError()
+    async def get_company_by_id(self, company_id: int) -> Company:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = (
+            select(Company)
+            .options(joinedload(Company.users))
+            .where(Company.id == company_id)
+        )
+        result: Optional[Company] = await self.get_instance(query)
+        if result:
+            logger.debug(f'Retrieved company by id "{company_id}": "{result}"')
+        return result

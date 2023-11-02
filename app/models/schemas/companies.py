@@ -33,7 +33,6 @@ class CompanyCreateSuccess(BaseModel):
 class CompanySchema(CompanyBase):
     id: int
     created_at: datetime
-    role: Optional[RoleEnum] = Field(None, nullable=True)
 
     class Config:
         from_attributes = True
@@ -42,7 +41,8 @@ class CompanySchema(CompanyBase):
 
 class UserCompanyM2m(BaseModel):
     id: int
-    title: str
+    title: Optional[str] = Field(None, nullable=True)
+    name: Optional[str] = Field(None, nullable=True)
     role: Optional[RoleEnum] = Field(None, nullable=True)
 
     class Config:

@@ -1,16 +1,40 @@
 from fastapi import APIRouter, Depends
 
+from app.api.dependencies.auth import auth_wrapper
 from app.api.dependencies.services import get_company_service
 from app.api.dependencies.user import get_current_user
-from app.api.docs.companies import get_create_company_responses
+from app.api.docs.companies import (
+    get_create_company_responses,
+    get_get_company_responses,
+)
 from app.models.db.users import User
 from app.models.schemas.companies import CompanyCreate, CompanyCreateSuccess
+from app.models.schemas.company_user import CompanyFullSchema
 from app.services.company import CompanyService
+
+# from app.models.schemas.company_user import
 
 router = APIRouter(
     prefix="/companies",
     tags=["Companies"],
 )
+
+
+@router.get(
+    "/{company_id}/",
+    response_model=CompanyFullSchema,
+    response_model_exclude_none=True,
+    responses=get_get_company_responses(),
+)
+async def get_company(
+    company_id: int,
+    company_service: CompanyService = Depends(get_company_service),
+    auth=Depends(auth_wrapper),
+) -> CompanyFullSchema:
+    """
+    ### Return a company data by id
+    """
+    return await company_service.get_company_by_id(company_id)
 
 
 @router.post("/create/", status_code=201, responses=get_create_company_responses())

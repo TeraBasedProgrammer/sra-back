@@ -1,5 +1,6 @@
+from app.models.db.companies import Company
 from app.models.db.users import User
-from app.models.schemas.companies import UserCompanyM2m
+from app.models.schemas.companies import CompanySchema, UserCompanyM2m
 from app.models.schemas.users import TagSchema, UserSchema
 
 
@@ -7,7 +8,7 @@ class UserFullSchema(UserSchema):
     companies: list[UserCompanyM2m]
 
     @classmethod
-    async def from_model(cls, user_model: User):
+    def from_model(cls, user_model: User):
         return cls(
             id=user_model.id,
             name=user_model.name,
@@ -26,5 +27,26 @@ class UserFullSchema(UserSchema):
                     role=company.role,
                 )
                 for company in user_model.companies
+            ],
+        )
+
+
+class CompanyFullSchema(CompanySchema):
+    users: list[UserCompanyM2m]
+
+    @classmethod
+    def from_model(cls, company_model: Company):
+        return cls(
+            id=company_model.id,
+            title=company_model.title,
+            description=company_model.description,
+            created_at=company_model.created_at,
+            users=[
+                UserCompanyM2m(
+                    id=user.users.id,
+                    name=user.users.name,
+                    role=user.role,
+                )
+                for user in company_model.users
             ],
         )

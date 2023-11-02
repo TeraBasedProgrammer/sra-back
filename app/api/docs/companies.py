@@ -48,3 +48,40 @@ def get_create_company_responses() -> dict[int, Any]:
     }
 
     return responses
+
+
+def get_get_company_responses() -> dict[int, Any]:
+    responses: dict[int, Any] = {
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Token decode error or token was not provided",
+            "content": {
+                "application/json": {"example": {"detail": "Not authenticated"}}
+            },
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Not found",
+            "content": {
+                "application/json": {"example": {"detail": "Company is not found"}}
+            },
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "One or more fields were passed incorrectly | Field validation error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "type": "int_parsing",
+                                "loc": ["path", "company_id"],
+                                "msg": "Input should be a valid integer, unable to parse string as an integer",
+                                "input": "not_an_integer",
+                                "url": "https://errors.pydantic.dev/2.1.2/v/int_parsing",
+                            }
+                        ]
+                    }
+                }
+            },
+        },
+    }
+
+    return responses

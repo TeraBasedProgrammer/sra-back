@@ -33,9 +33,6 @@ class UserBase(BaseModel):
 class UserSchema(UserBase):
     id: int
     registered_at: datetime
-
-    # Comment until bugs occur
-    # role: Optional[RoleEnum] = Field(None, nullable=True)
     average_score: Decimal
     tags: list[TagSchema]
 

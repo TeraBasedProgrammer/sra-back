@@ -106,3 +106,16 @@ def get_edit_profile_responses() -> dict[int, Any]:
     }
 
     return responses
+
+
+def get_user_companies_responses() -> dict[int, Any]:
+    responses: dict[int, Any] = {
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Token decode error or token was not provided",
+            "content": {
+                "application/json": {"example": {"detail": "Not authenticated"}}
+            },
+        },
+    }
+
+    return responses

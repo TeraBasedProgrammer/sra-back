@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser
 from app.models.db.users import User
-from app.models.schemas.companies import CompanyCreate
+from app.models.schemas.companies import CompanyCreate, CompanyList
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -36,8 +36,19 @@ class CompanyRepository(BaseRepository):
         query = select(Company).where(Company.id == company_id)
         return await self.exists(query)
 
-    async def get_user_companies(self) -> list[Company]:
-        raise NotImplementedError()
+    async def get_user_companies(self, current_user: User) -> list[CompanyList]:
+        query = (
+            select(Company)
+            .options(joinedload(Company.users))
+            .where(CompanyUser.user_id == current_user.id)
+        ).with_only_columns(Company.id, Company.title)
+        response = await self.async_session.execute(query)
+        result: list[Company] = response.unique()
+        if result:
+            return [
+                CompanyList(id=company.id, title=company.title) for company in result
+            ]
+        return []
 
     async def get_company_by_id(self, company_id: int) -> Company:
         logger.debug(f"Received data:\n{get_args()}")

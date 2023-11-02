@@ -39,6 +39,11 @@ class CompanySchema(CompanyBase):
         populate_by_name = True
 
 
+class CompanyList(BaseModel):
+    id: int
+    title: str
+
+
 class UserCompanyM2m(BaseModel):
     id: int
     title: Optional[str] = Field(None, nullable=True)

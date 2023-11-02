@@ -6,8 +6,10 @@ from app.api.docs.user_profile import (
     get_edit_profile_responses,
     get_profile_responses,
     get_reset_password_responses,
+    get_user_companies_responses,
 )
 from app.models.db.users import User
+from app.models.schemas.companies import CompanyList
 from app.models.schemas.company_user import UserFullSchema
 from app.models.schemas.users import PasswordResetInput, PasswordResetOutput, UserUpdate
 from app.services.company import CompanyService
@@ -30,14 +32,16 @@ async def get_user_profile(
     user_service: UserService = Depends(get_user_service),
 ) -> UserFullSchema:
     """
-    ### Retrieve user profile data
+    ### Retrieve ID and title fields of the user's companies
     """
     return await user_service.get_user_profile(current_user)
 
 
 @router.get(
     "/companies",
+    response_model=list[CompanyList],
     response_model_exclude_none=True,
+    responses=get_user_companies_responses(),
 )
 async def get_user_companies(
     current_user: User = Depends(get_current_user),

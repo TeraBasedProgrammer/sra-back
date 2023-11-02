@@ -29,8 +29,8 @@ class CompanyService:
                 ),
             )
 
-    async def get_user_companies(self):
-        return await self.company_repository.get_user_companies()
+    async def get_user_companies(self, current_user: User):
+        return await self.company_repository.get_user_companies(current_user)
 
     async def get_company_by_id(self, company_id: int) -> CompanyFullSchema:
         if not await self.company_repository.exists_by_id(company_id):

@@ -148,9 +148,7 @@ class UserService:
 
         # Generate password reset link
         reset_code = str(uuid.uuid1())
-        reset_link = (
-            f"{settings.HOST}:{settings.PORT}/forgot_password/reset/?q={reset_code}"
-        )
+        reset_link = f"{settings.FRONT_HOST}:{settings.FRONT_PORT}/forgot_password/reset/?q={reset_code}"
 
         # Put reset link into Redis
         await redis.set(reset_code, f"reset-key-{user_email}", ex=3600)

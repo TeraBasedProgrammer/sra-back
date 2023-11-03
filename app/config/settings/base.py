@@ -7,6 +7,8 @@ ROOT_DIR = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
 
 
 class BackendBaseSettings(BaseSettings):
+    HOST: str = decouple.config("HOST")
+    PORT: int = decouple.config("PORT", cast=int)
     DEBUG: bool = decouple.config("DEBUG", cast=bool)
     LOGGING_LEVEL: str = decouple.config("LOGGING_LEVEL")
     REDIS_URL: str = decouple.config("REDIS_URL")

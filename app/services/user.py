@@ -22,6 +22,7 @@ from app.models.schemas.users import (
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 from app.utilities.formatters.http_error import validation_error_wrapper
+from app.config.settings.base import settings
 
 
 class UserService:
@@ -146,7 +147,7 @@ class UserService:
 
         # Generate password reset link
         reset_code = str(uuid.uuid1())
-        reset_link = f"localhost:8000/set_password?q={reset_code}"
+        reset_link = f"{settings.HOST}:{settings.PORT}/set_password?q={reset_code}"
 
         # Put reset link into Redis
         await redis.set(reset_code, "valid", ex=86400)

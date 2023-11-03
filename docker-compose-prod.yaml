@@ -47,6 +47,17 @@ services:
     networks:
       - local
 
+  celery:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    container_name: celery_app
+    command: sh -c "celery -A app.core.tasks:celery worker --loglevel=INFO"
+    networks:
+      - local
+    depends_on:
+      - redis
 
 networks:
   local:

@@ -47,6 +47,33 @@ services:
     networks:
       - local
 
+  celery:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    container_name: celery_app
+    command: sh -c "celery -A app.core.tasks:celery worker --loglevel=INFO"
+    networks:
+      - local
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - ./.env
+    container_name: flower_app
+    command: sh -c "celery -A app.core.tasks:celery flower"
+    networks:
+      - local
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - 8888:5555
+
 
 networks:
   local:

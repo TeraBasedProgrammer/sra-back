@@ -51,7 +51,7 @@ services:
     build:
       context: .
     env_file:
-      - ./.env
+      - ./.env.prod
     container_name: celery_app
     command: sh -c "celery -A app.core.tasks:celery worker --loglevel=INFO"
     networks:

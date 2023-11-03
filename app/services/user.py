@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import HTTPException, status
+from pydantic import EmailStr
 
 from app.config.logs.logger import logger
 from app.config.settings.base import settings
@@ -147,13 +148,39 @@ class UserService:
 
         # Generate password reset link
         reset_code = str(uuid.uuid1())
-        reset_link = f"{settings.HOST}:{settings.PORT}/set_password?q={reset_code}"
+        reset_link = (
+            f"{settings.HOST}:{settings.PORT}/forgot_password/reset/?q={reset_code}"
+        )
 
         # Put reset link into Redis
-        await redis.set(reset_code, "valid", ex=86400)
+        await redis.set(reset_code, f"reset-key-{user_email}", ex=3600)
         # Create a background task to send an email
         send_email_report_dashboard.delay(user_email, user_name, reset_link)
 
         return PasswordChangeOutput(
             message="A link to reset your password has been sent to your email"
         )
+
+    async def verify_code(self, code: str) -> dict[str, str]:
+        if not await redis.get(code):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=validation_error_wrapper("Invalid code", "code"),
+            )
+
+        return {"status": "Valid"}
+
+    async def reset_forgotten_password(
+        self, new_password: str, code: str
+    ) -> dict[str, str]:
+        await self.verify_code(code)
+
+        user_email: EmailStr = (await redis.get(code)).split("-")[-1]
+        user_to_update = await self.user_repository.get_user_by_email(user_email)
+
+        user_to_update.password = auth_handler.get_password_hash(new_password)
+
+        await self.user_repository.save(user_to_update)
+        logger.info("The password was successfully updated")
+
+        return {"status": "The password was successfully changed"}

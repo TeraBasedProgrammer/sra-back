@@ -68,14 +68,17 @@ class UserUpdate(BaseModel):
         extra = Extra.forbid
 
 
-class PasswordResetInput(BaseModel):
-    old_password: str
+class NewPasswordInput(BaseModel):
     new_password: str
 
     @field_validator("new_password")
     @classmethod
     def validate(cls, value: str):
         return validate_password(value)
+
+
+class PasswordResetInput(NewPasswordInput):
+    old_password: str
 
 
 class PasswordForgotInput(BaseModel):

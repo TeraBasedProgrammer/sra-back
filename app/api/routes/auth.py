@@ -1,14 +1,24 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_user_service
-from app.api.docs.auth import get_login_responses, get_signup_responses
+from app.api.docs.auth import (
+    get_forgot_password_reset_responses,
+    get_forgot_password_responses,
+    get_login_responses,
+    get_signup_responses,
+    get_verify_code_responses,
+)
 from app.models.schemas.auth import (
     UserLoginInput,
     UserLoginOutput,
     UserSignUpInput,
     UserSignUpOutput,
 )
-from app.models.schemas.users import PasswordChangeOutput, PasswordForgotInput
+from app.models.schemas.users import (
+    NewPasswordInput,
+    PasswordChangeOutput,
+    PasswordForgotInput,
+)
 from app.services.user import UserService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -16,7 +26,6 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post(
     "/signup/",
-    # description="Create new user account",
     response_model=UserSignUpOutput,
     status_code=201,
     responses=get_signup_responses(),
@@ -41,14 +50,51 @@ async def login(
 
 
 @router.post(
-    "/forgot-password",
+    "/forgot-password/",
     response_model=PasswordChangeOutput,
-    # responses=get_forgot_password_responses(),
+    responses=get_forgot_password_responses(),
 )
 async def forgot_password(
     data: PasswordForgotInput, user_service: UserService = Depends(get_user_service)
 ) -> PasswordChangeOutput:
     """
     ### Pass the existing email to recieve password restoration link on the email
+
+    ### Steps to perform password change on the frontend side:
+
+    1. When user clicks on the reset link, you should perform secret HTTP request to the `/auth/forgot-password/verify-code/` endpoint.
+        - If the response code is 200, render the form page
+        - If the response code is either 400 or 422, render the error page
+    2. Save the reset code (query parameter) and send it to the `/auth/forgot-password/reset/` endpoint alongside the payload
     """
     return await user_service.handle_forgot_password(data.email)
+
+
+@router.post(
+    "/forgot-password/verify-code/",
+    response_model=dict[str, str],
+    responses=get_verify_code_responses(),
+)
+async def verify_reset_password_code(
+    code: str, user_service: UserService = Depends(get_user_service)
+) -> dict[str, str]:
+    """
+    ### Pass the reset code and get a response
+    """
+    return await user_service.verify_code(code)
+
+
+@router.post(
+    "/forgot-password/reset/",
+    response_model=dict[str, str],
+    responses=get_forgot_password_reset_responses(),
+)
+async def reset_password(
+    code: str,
+    data: NewPasswordInput,
+    user_service: UserService = Depends(get_user_service),
+) -> dict[str, str]:
+    """
+    ### Pass the reset code and get a response
+    """
+    return await user_service.reset_forgotten_password(data.new_password, code)

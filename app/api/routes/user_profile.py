@@ -11,7 +11,11 @@ from app.api.docs.user_profile import (
 from app.models.db.users import User
 from app.models.schemas.companies import CompanyList
 from app.models.schemas.company_user import UserFullSchema
-from app.models.schemas.users import PasswordResetInput, PasswordResetOutput, UserUpdate
+from app.models.schemas.users import (
+    PasswordChangeOutput,
+    PasswordResetInput,
+    UserUpdate,
+)
 from app.services.company import CompanyService
 from app.services.user import UserService
 
@@ -72,14 +76,14 @@ async def edit_user_profile(
 
 @router.patch(
     "/edit/reset_password",
-    response_model=PasswordResetOutput,
+    response_model=PasswordChangeOutput,
     responses=get_reset_password_responses(),
 )
 async def reset_password(
     data: PasswordResetInput,
     current_user: int = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
-) -> PasswordResetOutput:
+) -> PasswordChangeOutput:
     """
     ### Reset user password
     """

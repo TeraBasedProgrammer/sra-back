@@ -21,6 +21,10 @@ class BackendBaseSettings(BaseSettings):
     POSTGRES_PORT: int = decouple.config("POSTGRES_PORT", cast=int)
     POSTGRES_HOST: str = decouple.config("POSTGRES_HOST")
     IS_ALLOWED_CREDENTIALS: bool = decouple.config("IS_ALLOWED_CREDENTIALS", cast=bool)
+    SMTP_HOST: str = decouple.config("SMTP_HOST")
+    SMTP_PORT: int = decouple.config("SMTP_PORT", cast=int)
+    SMTP_USER: str = decouple.config("SMTP_USER")
+    SMTP_PASSWORD: str = decouple.config("SMTP_PASSWORD")
 
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",  # React default port

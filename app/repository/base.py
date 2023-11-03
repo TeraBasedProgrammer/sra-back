@@ -5,7 +5,7 @@ from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 
-from app.models.database import Base
+from app.core.database import Base
 
 
 class BaseRepository:

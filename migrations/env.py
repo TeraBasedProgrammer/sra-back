@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from app.models.database import DATABASE_URL, Base
+from app.core.database import DATABASE_URL, Base
 from app.models.db.attempts import Attempt
 from app.models.db.companies import Company, CompanyUser
 

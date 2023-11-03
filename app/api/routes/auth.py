@@ -8,6 +8,7 @@ from app.models.schemas.auth import (
     UserSignUpInput,
     UserSignUpOutput,
 )
+from app.models.schemas.users import PasswordChangeOutput, PasswordForgotInput
 from app.services.user import UserService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -37,3 +38,17 @@ async def login(
     ### Authenticate and retrieve a JWT token
     """
     return await user_service.authenticate_user(user_data)
+
+
+@router.post(
+    "/forgot-password",
+    response_model=PasswordChangeOutput,
+    # responses=get_forgot_password_responses(),
+)
+async def forgot_password(
+    data: PasswordForgotInput, user_service: UserService = Depends(get_user_service)
+) -> PasswordChangeOutput:
+    """
+    ### Pass the existing email to recieve password restoration link on the email
+    """
+    return await user_service.handle_forgot_password(data.email)

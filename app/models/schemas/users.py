@@ -78,8 +78,12 @@ class PasswordResetInput(BaseModel):
         return validate_password(value)
 
 
-class PasswordResetOutput(BaseModel):
-    success: str = "The password was successfully reset"
+class PasswordForgotInput(BaseModel):
+    email: EmailStr
+
+
+class PasswordChangeOutput(BaseModel):
+    message: str
 
 
 class DeletedInstanceResponse(BaseModel):

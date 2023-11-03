@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import DECIMAL, TIMESTAMP, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.models.database import Base
+from app.core.database import Base
 
 # from app.models.db.attempts import Attempt
 

@@ -1,6 +1,10 @@
+import uuid
+
 from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
+from app.core.database import redis
+from app.core.tasks import send_email_report_dashboard
 from app.models.db.users import User
 from app.models.schemas.auth import (
     UserLoginInput,
@@ -10,8 +14,8 @@ from app.models.schemas.auth import (
 )
 from app.models.schemas.company_user import UserFullSchema
 from app.models.schemas.users import (
+    PasswordChangeOutput,
     PasswordResetInput,
-    PasswordResetOutput,
     UserCreate,
     UserUpdate,
 )
@@ -103,7 +107,7 @@ class UserService:
 
     async def reset_password(
         self, current_user: User, data: PasswordResetInput
-    ) -> PasswordResetOutput:
+    ) -> PasswordChangeOutput:
         logger.info(f'Change password request from user "{current_user}"')
 
         # Validate the old password match the current one
@@ -126,4 +130,29 @@ class UserService:
         await self.user_repository.save(current_user)
         logger.info("The password was successfully updated")
 
-        return PasswordResetOutput
+        return PasswordChangeOutput(message="The password was successfully reset")
+
+    async def handle_forgot_password(self, user_email: str) -> PasswordChangeOutput:
+        if not await self.user_repository.exists_by_email(user_email):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail=validation_error_wrapper(
+                    "User with this email is not found", "email"
+                ),
+            )
+
+        user: User = await self.user_repository.get_user_by_email(user_email)
+        user_name: str = "User" if not user else user.name
+
+        # Generate password reset link
+        reset_code = str(uuid.uuid1())
+        reset_link = f"localhost:8000/set_password?q={reset_code}"
+
+        # Put reset link into Redis
+        await redis.set(reset_code, "valid", ex=86400)
+        # Create a background task to send an email
+        send_email_report_dashboard.delay(user_email, user_name, reset_link)
+
+        return PasswordChangeOutput(
+            message="A link to reset your password has been sent to your email"
+        )

@@ -3,6 +3,7 @@ import uuid
 from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
+from app.config.settings.base import settings
 from app.core.database import redis
 from app.core.tasks import send_email_report_dashboard
 from app.models.db.users import User
@@ -22,7 +23,6 @@ from app.models.schemas.users import (
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 from app.utilities.formatters.http_error import validation_error_wrapper
-from app.config.settings.base import settings
 
 
 class UserService:

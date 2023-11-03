@@ -16,7 +16,13 @@ def get_email_template_dashboard(user_email: EmailStr, user_name: str, reset_lin
     email["To"] = user_email
 
     email.set_content(
-        f'<div style="color: blue;">{user_name} {reset_link}</div>', subtype="html"
+        f"<div><p>Dear {user_name}</p>"
+        "<p>You have requested a password reset for your account. To reset your password, please click on the following link:</p>"
+        f"<p><a>{reset_link}</a></p>"
+        "<p>If you did not request a password reset, please ignore this message.</p>"
+        "<p>Best regards,</p>"
+        "<p>Testeam</p></div>",
+        subtype="html",
     )
     return email
 

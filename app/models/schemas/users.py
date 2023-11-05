@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, Extra, Field, field_validator
 
 from app.models.schemas.tags import TagSchema
-from app.utilities.validators.user import (
+from app.utilities.validators.payload.user import (
     validate_name,
     validate_password,
     validate_phone_number,

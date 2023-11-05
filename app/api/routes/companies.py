@@ -10,9 +10,8 @@ from app.api.docs.companies import (
 from app.models.db.users import User
 from app.models.schemas.companies import CompanyCreate, CompanyCreateSuccess
 from app.models.schemas.company_user import CompanyFullSchema
+from app.models.schemas.tags import TagSchema
 from app.services.company import CompanyService
-
-# from app.models.schemas.company_user import
 
 router = APIRouter(
     prefix="/companies",
@@ -35,6 +34,19 @@ async def get_company(
     ### Return a company data by id
     """
     return await company_service.get_company_by_id(company_id)
+
+
+# 200, 400, 403, 401, 422
+@router.get("/{company_id}/tags/", response_model=list[TagSchema])
+async def get_tags_list(
+    company_id: int,
+    current_user: User = Depends(get_current_user),
+    company_service: CompanyService = Depends(get_company_service),
+) -> list[TagSchema]:
+    """
+    ### Returns a list with all the available tags within the company
+    """
+    return await company_service.get_company_tags(current_user, company_id)
 
 
 @router.post("/create/", status_code=201, responses=get_create_company_responses())

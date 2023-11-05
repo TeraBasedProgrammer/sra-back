@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 
 from app.models.db.companies import RoleEnum
-from app.utilities.validators.text import validate_text
+from app.utilities.validators.payload.text import validate_text
 
 
 class CompanyBase(BaseModel):

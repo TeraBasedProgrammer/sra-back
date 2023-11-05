@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator
 
-from app.utilities.validators.text import validate_text
+from app.utilities.validators.payload.text import validate_text
 
 
 class TagBaseSchema(BaseModel):

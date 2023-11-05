@@ -1,11 +1,18 @@
 from datetime import datetime
 
-from sqlalchemy import DECIMAL, TIMESTAMP, Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import (
+    DECIMAL,
+    TIMESTAMP,
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-
-# from app.models.db.attempts import Attempt
 
 
 class User(Base):
@@ -32,12 +39,14 @@ class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String, unique=True)
+    title = Column(String)
     description = Column(String, nullable=True)
     company_id = Column(ForeignKey("companies.id", ondelete="CASCADE"))
 
     users = relationship("TagUser", back_populates="tags", lazy="select")
     quizzes = relationship("TagQuiz", back_populates="tags", lazy="select")
+
+    __table_args__ = (UniqueConstraint("title", "company_id", name="_tag_uc"),)
 
 
 class TagUser(Base):

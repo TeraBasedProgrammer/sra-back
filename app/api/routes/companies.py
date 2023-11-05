@@ -10,7 +10,7 @@ from app.api.docs.companies import (
 from app.models.db.users import User
 from app.models.schemas.companies import CompanyCreate, CompanyCreateSuccess
 from app.models.schemas.company_user import CompanyFullSchema
-from app.models.schemas.tags import TagSchema
+from app.models.schemas.tags import TagBaseSchema
 from app.services.company import CompanyService
 
 router = APIRouter(
@@ -37,12 +37,12 @@ async def get_company(
 
 
 # 200, 400, 403, 401, 422
-@router.get("/{company_id}/tags/", response_model=list[TagSchema])
+@router.get("/{company_id}/tags/", response_model=list[TagBaseSchema])
 async def get_tags_list(
     company_id: int,
     current_user: User = Depends(get_current_user),
     company_service: CompanyService = Depends(get_company_service),
-) -> list[TagSchema]:
+) -> list[TagBaseSchema]:
     """
     ### Returns a list with all the available tags within the company
     """

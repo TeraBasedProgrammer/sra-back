@@ -1,7 +1,7 @@
 from app.models.db.companies import Company
 from app.models.db.users import User
 from app.models.schemas.companies import CompanySchema, UserCompanyM2m
-from app.models.schemas.users import TagSchema, UserSchema
+from app.models.schemas.users import TagBaseSchema, UserSchema
 
 
 class UserFullSchema(UserSchema):
@@ -17,7 +17,7 @@ class UserFullSchema(UserSchema):
             phone_number=user_model.phone_number,
             average_score=user_model.average_score,
             tags=[
-                TagSchema(id=tag.tags.id, title=tag.tags.title)
+                TagBaseSchema(id=tag.tags.id, title=tag.tags.title)
                 for tag in user_model.tags
             ],
             companies=[

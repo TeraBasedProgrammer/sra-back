@@ -8,7 +8,9 @@ from app.utilities.formatters.http_error import validation_error_wrapper
 
 def validate_text(value: str, field_name: str):
     if not re.compile(r"^[a-zA-Z0-9\-./!,\(\) ]+$").match(value):
-        logger.warning("Validation error: 'title' field contains restricted characters")
+        logger.warning(
+            f"Validation error: {field_name} field contains restricted characters"
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=validation_error_wrapper(

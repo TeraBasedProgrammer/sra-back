@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Extra, Field, field_validator
 
-from app.models.schemas.tags import TagSchema
+from app.models.schemas.tags import TagBaseSchema
 from app.utilities.validators.payload.user import (
     validate_name,
     validate_password,
@@ -34,7 +34,7 @@ class UserSchema(UserBase):
     id: int
     registered_at: datetime
     average_score: Decimal
-    tags: list[TagSchema]
+    tags: list[TagBaseSchema]
 
     class Config:
         from_attributes = True

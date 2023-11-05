@@ -42,7 +42,7 @@ async def get_user_profile(
 
 
 @router.get(
-    "/companies",
+    "/companies/",
     response_model=list[CompanyList],
     response_model_exclude_none=True,
     responses=get_user_companies_responses(),
@@ -58,7 +58,7 @@ async def get_user_companies(
 
 
 @router.patch(
-    "/edit",
+    "/edit/",
     response_model=UserFullSchema,
     response_model_exclude_none=True,
     responses=get_edit_profile_responses(),
@@ -75,7 +75,7 @@ async def edit_user_profile(
 
 
 @router.patch(
-    "/edit/reset_password",
+    "/edit/reset_password/",
     response_model=PasswordChangeOutput,
     responses=get_reset_password_responses(),
 )

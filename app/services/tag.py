@@ -23,14 +23,37 @@ class TagService:
         members: list[
             CompanyMember
         ] = await self.company_repository.get_company_members(company_id)
+
         if not validate_user_company_role(members, current_user_id):
             raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
         tags: list[Tag] = await self.tag_repository.get_company_tags(company_id)
         return [TagBaseSchema(id=tag.id, title=tag.title) for tag in tags]
 
-    async def get_tag_by_id(self, tag_id: int) -> TagSchema:
-        if not self.tag_repository.exists_by_id(tag_id):
+    async def get_tag_by_id(
+        self, company_id: int, current_user_id: int, tag_id: int
+    ) -> TagSchema:
+        if not await self.company_repository.exists_by_id(company_id):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, detail="Company is not found"
+            )
+
+        if not await self.tag_repository.exists_by_id(tag_id):
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Tag is not found")
 
-        # tag = self.tag_repository.get_tag_by_id(tag_id)
+        members: list[
+            CompanyMember
+        ] = await self.company_repository.get_company_members(company_id)
+
+        if not validate_user_company_role(members, current_user_id):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+        tag = await self.tag_repository.get_tag_by_id(tag_id)
+        if tag.company_id != company_id:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+        return TagSchema(
+            id=tag.id,
+            title=tag.title,
+            description=tag.description,
+        )

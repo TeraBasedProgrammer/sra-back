@@ -51,8 +51,16 @@ async def get_tags_list(
 
 
 @router.get("/{company_id}/tags/{tag_id}/")
-async def get_tag(tag_id: int):
-    pass
+async def get_company_tag(
+    company_id: int,
+    tag_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    tag_service: TagService = Depends(get_tag_service),
+):
+    """
+    ### Returns a specific tag instance
+    """
+    return await tag_service.get_tag_by_id(company_id, current_user_id, tag_id)
 
 
 @router.post("/create/", status_code=201, responses=get_create_company_responses())

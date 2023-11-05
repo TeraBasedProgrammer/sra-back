@@ -14,8 +14,7 @@ class TagBaseSchema(BaseModel):
 
 
 class TagSchema(TagBaseSchema):
-    description: int
-    company_id: int
+    description: str
 
     @field_validator("description")
     @classmethod

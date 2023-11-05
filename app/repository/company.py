@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -65,7 +64,7 @@ class CompanyRepository(BaseRepository):
             .options(joinedload(Company.users))
             .where(Company.id == company_id)
         )
-        result: Optional[Company] = await self.get_instance(query)
+        result: Company = await self.get_instance(query)
         if result:
             logger.debug(f'Retrieved company by id "{company_id}": "{result}"')
         return result

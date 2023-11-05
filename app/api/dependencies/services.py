@@ -25,6 +25,7 @@ def get_company_service(
 
 def get_tag_service(
     tag_repository: TagRepository = Depends(get_repository(TagRepository)),
+    company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
 ) -> CompanyService:
-    service = TagService(tag_repository)
+    service = TagService(tag_repository, company_repository)
     return service

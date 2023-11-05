@@ -33,6 +33,8 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, unique=True)
+    description = Column(String, nullable=True)
+    company_id = Column(ForeignKey("companies.id", ondelete="CASCADE"))
 
     users = relationship("TagUser", back_populates="tags", lazy="select")
     quizzes = relationship("TagQuiz", back_populates="tags", lazy="select")

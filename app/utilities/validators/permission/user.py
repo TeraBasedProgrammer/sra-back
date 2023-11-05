@@ -1,31 +1,32 @@
 from typing import Optional
 
-from app.models.db.companies import Company, RoleEnum
-from app.models.db.users import User
+from app.models.db.companies import RoleEnum
+from app.repository.company import CompanyMember
+
+
+def _get_role_validation_condition(
+    member: CompanyMember, roles: tuple[RoleEnum]
+) -> bool:
+    return True if not roles else member.role in roles
 
 
 def validate_user_company_role(
-    company: Company, user: User, roles: Optional[tuple[RoleEnum]] = None
+    members: list[CompanyMember], user_id: int, roles: Optional[tuple[RoleEnum]] = None
 ) -> bool:
     """Validates if user has a specific role(-s) in the company (or any)
 
     Args:
-        company (Company): Company instance
-        user (User): User instance
-        role (Optional[tuple[RoleEnum]]): RoleEnum tuple. If None, the function skips role validation
+        members (list[CompanyMember]): list of company members data
+        user_id (int): current user id
+        roles (Optional[tuple[RoleEnum]], optional): tuple of roles for permission validation.
+        If None, role validation is skipped. Defaults to None.
 
     Returns:
-        bool: indicates wether user has a specific role in the company or not
+        bool: flag that defines wether current user is a member of the company or not
     """
-    if not roles:
-        user = list(filter(lambda x: x.users.id == user.id, company.users))
-        if not user:
-            return False
-    else:
-        user = list(
-            filter(lambda x: x.users.id == user.id and x.role in roles, company.users)
-        )
-        if not user:
-            return False
 
-    return True
+    for member in members:
+        if user_id == member.id and _get_role_validation_condition(member, roles):
+            return True
+
+    return False

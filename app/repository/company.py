@@ -1,14 +1,21 @@
+from dataclasses import dataclass
 from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.config.logs.logger import logger
-from app.models.db.companies import Company, CompanyUser
-from app.models.db.users import Tag, User
+from app.models.db.companies import Company, CompanyUser, RoleEnum
+from app.models.db.users import User
 from app.models.schemas.companies import CompanyCreate, CompanyList
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
+
+
+@dataclass
+class CompanyMember:
+    id: int
+    role: RoleEnum
 
 
 class CompanyRepository(BaseRepository):
@@ -63,8 +70,14 @@ class CompanyRepository(BaseRepository):
             logger.debug(f'Retrieved company by id "{company_id}": "{result}"')
         return result
 
-    async def get_company_tags(self, company_id) -> list[Tag]:
-        result = await self.async_session.execute(
-            select(Tag).where(Tag.company_id == company_id)
+    async def get_company_members(self, company_id: int) -> list[CompanyMember]:
+        query = (
+            select(CompanyUser)
+            .where(CompanyUser.company_id == company_id)
+            .with_only_columns(CompanyUser.user_id, CompanyUser.role)
         )
-        return result.scalars().all()
+        result: list[tuple[CompanyMember]] = await self.get_all(query)
+        if result:
+            logger.debug(f'Retrieved company "{company_id}" members: "{result}"')
+
+        return [CompanyMember(id=member[0], role=member[1]) for member in result]

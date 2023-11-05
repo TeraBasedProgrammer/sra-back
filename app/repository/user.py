@@ -83,14 +83,13 @@ class UserRepository(BaseRepository):
             logger.debug(f'Retrieved user by email "{email}": "{result.id}"')
         return result
 
-    # TODO: test
     async def get_user_id(self, email: EmailStr) -> Optional[int]:
         logger.debug(f"Received data:\n{get_args()}")
 
         query = select(User).where(User.email == email).with_only_columns(User.id)
         result: Optional[User] = await self.get_instance(query)
         if result:
-            logger.debug(f'Retrieved user id by email "{email}": "{result.id}"')
+            logger.debug(f'Retrieved user id by email "{email}": "{result}"')
         return result
 
     async def exists_by_id(self, user_id: int) -> bool:

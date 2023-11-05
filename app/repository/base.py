@@ -28,7 +28,12 @@ class BaseRepository:
         result = response.first()
         return bool(result)
 
-    async def get_instance(self, query: Select):
+    async def get_all(self, query: Select) -> list[Any]:
+        response = await self.async_session.execute(query)
+        result = response.unique().all()
+        return result
+
+    async def get_instance(self, query: Select) -> Base:
         response = await self.async_session.execute(query)
         result = response.unique().scalar_one_or_none()
         return result

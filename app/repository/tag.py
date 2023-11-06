@@ -3,12 +3,21 @@ from sqlalchemy.orm import load_only
 
 from app.config.logs.logger import logger
 from app.models.db.users import Tag
+from app.models.schemas.tags import TagCreateInput
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
 
 class TagRepository(BaseRepository):
     model = Tag
+
+    async def create_tag(self, tag_data: TagCreateInput) -> int:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        new_tag: Tag = await self.create(tag_data)
+
+        logger.debug("Successfully inserted new tag instance into the database")
+        return new_tag.id
 
     async def exists_by_id(self, tag_id: int) -> bool:
         logger.debug(f"Received data:\n{get_args()}")

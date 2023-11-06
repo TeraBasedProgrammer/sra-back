@@ -50,19 +50,6 @@ async def get_tags_list(
     return await tag_service.get_company_tags(current_user_id, company_id)
 
 
-@router.get("/{company_id}/tags/{tag_id}/")
-async def get_company_tag(
-    company_id: int,
-    tag_id: int,
-    current_user_id: int = Depends(get_current_user_id),
-    tag_service: TagService = Depends(get_tag_service),
-):
-    """
-    ### Returns a specific tag instance
-    """
-    return await tag_service.get_tag_by_id(company_id, current_user_id, tag_id)
-
-
 @router.post("/create/", status_code=201, responses=get_create_company_responses())
 async def create_company(
     company_data: CompanyCreate,
@@ -73,18 +60,3 @@ async def create_company(
     ### Create a new company instance
     """
     return await company_service.create_company(company_data, current_user)
-
-
-@router.post("/{company_id}/tags/create/")
-async def create_tag(tag_id: int):
-    pass
-
-
-@router.patch("/{company_id}/tags/{tag_id}/update")
-async def update_tag(tag_id: int):
-    pass
-
-
-@router.delete("/{company_id}/tags/{tag_id}/delete")
-async def delete_tag(tag_id: int):
-    pass

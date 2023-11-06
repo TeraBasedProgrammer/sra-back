@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import load_only
 
 from app.config.logs.logger import logger
 from app.models.db.users import Tag
@@ -18,8 +19,8 @@ class TagRepository(BaseRepository):
     async def get_company_tags(self, company_id) -> list[Tag]:
         result = await self.async_session.execute(
             select(Tag)
+            .options(load_only(Tag.id, Tag.title))
             .where(Tag.company_id == company_id)
-            .with_only_columns(Tag.id, Tag.title)
         )
         return result.scalars().all()
 

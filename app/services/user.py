@@ -23,10 +23,11 @@ from app.models.schemas.users import (
 )
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
+from app.services.base import BaseService
 from app.utilities.formatters.http_error import validation_error_wrapper
 
 
-class UserService:
+class UserService(BaseService):
     def __init__(self, user_repository) -> None:
         self.user_repository: UserRepository = user_repository
 

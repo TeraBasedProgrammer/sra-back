@@ -1,4 +1,6 @@
-from pydantic import BaseModel, field_validator
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 from app.utilities.validators.payload.text import validate_text
 
@@ -24,7 +26,7 @@ class TagSchema(TagBaseSchema):
 
 # TODO: find out how to simplify
 class TagCreateInput(BaseModel):
-    title: str
+    title: str = Field(min_length=4, max_length=30)
     description: str
     company_id: int
 
@@ -41,3 +43,9 @@ class TagCreateInput(BaseModel):
 
 class TagCreateOutput(BaseModel):
     tag_id: int
+
+
+# TODO: find out how to simplify
+class TagUpdateInput(BaseModel):
+    title: Optional[str] = Field(min_length=4, max_length=30, default=None)
+    description: Optional[str] = Field(default=None)

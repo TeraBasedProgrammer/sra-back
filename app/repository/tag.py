@@ -3,7 +3,7 @@ from sqlalchemy.orm import load_only
 
 from app.config.logs.logger import logger
 from app.models.db.users import Tag
-from app.models.schemas.tags import TagCreateInput
+from app.models.schemas.tags import TagCreateInput, TagUpdateInput
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -35,3 +35,10 @@ class TagRepository(BaseRepository):
         if result:
             logger.debug(f'Retrieved tag by id "{tag_id}": "{result}"')
         return result
+
+    async def update_tag(self, tag_id: int, tag_data: TagUpdateInput) -> Tag:
+        logger.debug(f"Received data:\n{get_args()}")
+        updated_tag = await self.update(tag_id, tag_data)
+
+        logger.debug(f'Successfully updatetd tag instance "{tag_id}"')
+        return updated_tag

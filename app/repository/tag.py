@@ -19,12 +19,6 @@ class TagRepository(BaseRepository):
         logger.debug("Successfully inserted new tag instance into the database")
         return new_tag.id
 
-    async def exists_by_id(self, tag_id: int) -> bool:
-        logger.debug(f"Received data:\n{get_args()}")
-
-        query = select(Tag).where(Tag.id == tag_id)
-        return await self.exists(query)
-
     async def get_company_tags(self, company_id) -> list[Tag]:
         result = await self.async_session.execute(
             select(Tag)

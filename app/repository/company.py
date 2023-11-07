@@ -36,12 +36,6 @@ class CompanyRepository(BaseRepository):
         logger.debug("Successfully inserted new company instance into the database")
         return new_company.id
 
-    async def exists_by_id(self, company_id: int):
-        logger.debug(f"Received data:\n{get_args()}")
-
-        query = select(Company).where(Company.id == company_id)
-        return await self.exists(query)
-
     async def get_user_companies(self, current_user: User) -> list[CompanyList]:
         query = (
             select(Company)

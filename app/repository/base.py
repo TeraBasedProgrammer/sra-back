@@ -1,11 +1,13 @@
 from typing import Any, Type
 
 from pydantic import BaseModel
-from sqlalchemy import delete, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
 
+from app.config.logs.logger import logger
 from app.core.database import Base
+from app.utilities.formatters.get_args import get_args
 
 
 class BaseRepository:
@@ -27,6 +29,12 @@ class BaseRepository:
 
         result = response.first()
         return bool(result)
+
+    async def exists_by_id(self, instance_id: int) -> bool:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = select(self.model).where(self.model.id == instance_id)
+        return await self.exists(query)
 
     async def get_all(self, query: Select) -> list[Any]:
         response = await self.async_session.execute(query)

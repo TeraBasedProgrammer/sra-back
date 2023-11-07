@@ -99,3 +99,17 @@ class TagService(BaseService):
             title=updated_tag.title,
             description=updated_tag.description,
         )
+
+    async def delete_tag(self, tag_id: int, current_user_id: int) -> None:
+        await self._validate_instance_exists(self.tag_repository, tag_id)
+
+        tag = await self.tag_repository.get_tag_by_id(tag_id)
+
+        await self._validate_user_permissions(
+            self.company_repository,
+            tag.company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin),
+        )
+
+        await self.tag_repository.delete_tag(tag_id)

@@ -42,3 +42,7 @@ class TagRepository(BaseRepository):
 
         logger.debug(f'Successfully updatetd tag instance "{tag_id}"')
         return updated_tag
+
+    async def delete_tag(self, tag_id: int) -> None:
+        logger.debug(f"Received data:\n{get_args()}")
+        await self.delete(tag_id)

@@ -26,7 +26,7 @@ class Company(Base):
     users = relationship("CompanyUser", back_populates="companies", lazy="select")
 
     def __repr__(self) -> str:
-        return f"Company {self.title}"
+        return f"Company '{self.title}'"
 
 
 class CompanyUser(Base):

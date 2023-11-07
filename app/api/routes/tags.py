@@ -50,6 +50,13 @@ async def update_tag(
     return await tag_service.update_tag(tag_id, tag_data, current_user_id)
 
 
-@router.delete("/{tag_id}/delete/")
-async def delete_tag(tag_id: int):
-    pass
+@router.delete("/{tag_id}/delete/", response_model=None, status_code=204)
+async def delete_tag(
+    tag_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    tag_service: TagService = Depends(get_tag_service),
+):
+    """
+    ### Allows to delete a specific Tag instance
+    """
+    return await tag_service.delete_tag(tag_id, current_user_id)

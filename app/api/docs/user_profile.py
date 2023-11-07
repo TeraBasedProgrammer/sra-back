@@ -1,121 +1,52 @@
-from typing import Any
-
 from fastapi import status
 
-from app.utilities.formatters.http_error import validation_error_wrapper
+from app.api.docs.base import ResponseDocumentation
 
 
-def get_profile_responses() -> dict[int, Any]:
-    responses: dict[int, Any] = {
-        status.HTTP_401_UNAUTHORIZED: {
-            "description": "Token decode error or token was not provided",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
-        },
-    }
+class UserProfileDocumentation(ResponseDocumentation):
+    def get_user_profile(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            status.HTTP_401_UNAUTHORIZED: self._401_response(),
+        }
 
-    return responses
+        return responses
 
+    def get_user_companies(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            status.HTTP_401_UNAUTHORIZED: self._401_response(),
+        }
 
-def get_reset_password_responses() -> dict[int, Any]:
-    responses: dict[int, Any] = {
-        status.HTTP_401_UNAUTHORIZED: {
-            "description": "Token decode error or token was not provided",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Field validation error",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": validation_error_wrapper(
-                            "Invalid old password", "old_password"
-                        )
-                    }
-                }
-            },
-        },
-        status.HTTP_409_CONFLICT: {
-            "description": "The new password matches the old one",
-            "content": {
-                "application/json": {"example": {"detail": "Matching passwords"}}
-            },
-        },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "description": "One or more fields were passed incorrectly | Field validation error",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "type": "string_type",
-                                "loc": ["body", "old_password"],
-                                "msg": "Input should be a valid string",
-                                "input": 0,
-                                "url": "https://errors.pydantic.dev/2.1.2/v/string_type",
-                            }
-                        ]
-                    }
-                }
-            },
-        },
-    }
+        return responses
 
-    return responses
+    def edit_user_profile(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            status.HTTP_401_UNAUTHORIZED: self._401_response(),
+            status.HTTP_400_BAD_REQUEST: self._400_response("Invalid name", "name"),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["body", "name"],
+                "Input should be a valid string",
+            ),
+        }
+
+        return responses
+
+    def reset_password(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            status.HTTP_401_UNAUTHORIZED: self._401_response(),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "Invalid old password", "old_password"
+            ),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["body", "old_password"],
+                "Input should be a valid string",
+            ),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "The new password matches the old one",
+                {"detail": "Matching passwords"},
+            ),
+        }
+
+        return responses
 
 
-def get_edit_profile_responses() -> dict[int, Any]:
-    responses: dict[int, Any] = {
-        status.HTTP_401_UNAUTHORIZED: {
-            "description": "Token decode error or token was not provided",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Field validation error",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": validation_error_wrapper("Invalid name", "name")
-                    }
-                }
-            },
-        },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "description": "One or more fields were passed incorrectly",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "type": "string_type",
-                                "loc": ["body", "name"],
-                                "msg": "Input should be a valid string",
-                                "input": 0,
-                                "url": "https://errors.pydantic.dev/2.1.2/v/string_type",
-                            }
-                        ]
-                    }
-                }
-            },
-        },
-    }
-
-    return responses
-
-
-def get_user_companies_responses() -> dict[int, Any]:
-    responses: dict[int, Any] = {
-        status.HTTP_401_UNAUTHORIZED: {
-            "description": "Token decode error or token was not provided",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
-        },
-    }
-
-    return responses
+user_profile_docs = UserProfileDocumentation()

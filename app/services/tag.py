@@ -14,6 +14,7 @@ from app.models.schemas.tags import (
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
+from app.utilities.formatters.http_error import validation_error_wrapper
 
 
 class TagService(BaseService):
@@ -60,7 +61,6 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_instance_exists(self.company_repository, tag.company_id)
         await self._validate_user_permissions(
             self.company_repository, tag.company_id, current_user_id
         )
@@ -81,7 +81,9 @@ class TagService(BaseService):
             logger.warning("Validation error: No parameters have been provided")
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail="At least one valid field should be provided",
+                detail=validation_error_wrapper(
+                    "At least one valid field should be provided", None
+                ),
             )
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)

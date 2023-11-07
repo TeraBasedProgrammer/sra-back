@@ -1,13 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_user_service
-from app.api.docs.auth import (
-    get_forgot_password_reset_responses,
-    get_forgot_password_responses,
-    get_login_responses,
-    get_signup_responses,
-    get_verify_code_responses,
-)
+from app.api.docs.auth import auth_docs
 from app.models.schemas.auth import (
     UserLoginInput,
     UserLoginOutput,
@@ -28,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
     "/signup/",
     response_model=UserSignUpOutput,
     status_code=201,
-    responses=get_signup_responses(),
+    responses=auth_docs.signup(),
 )
 async def signup(
     user_data: UserSignUpInput, user_service: UserService = Depends(get_user_service)
@@ -39,7 +33,7 @@ async def signup(
     return await user_service.register_user(user_data)
 
 
-@router.post("/login/", response_model=UserLoginOutput, responses=get_login_responses())
+@router.post("/login/", response_model=UserLoginOutput, responses=auth_docs.login())
 async def login(
     user_data: UserLoginInput, user_service: UserService = Depends(get_user_service)
 ) -> UserLoginOutput:
@@ -52,7 +46,7 @@ async def login(
 @router.post(
     "/forgot-password/",
     response_model=PasswordChangeOutput,
-    responses=get_forgot_password_responses(),
+    responses=auth_docs.forgot_password(),
 )
 async def forgot_password(
     data: PasswordForgotInput, user_service: UserService = Depends(get_user_service)
@@ -73,7 +67,7 @@ async def forgot_password(
 @router.post(
     "/forgot-password/verify-code/",
     response_model=dict[str, str],
-    responses=get_verify_code_responses(),
+    responses=auth_docs.verify_reset_password_code(),
 )
 async def verify_reset_password_code(
     code: str, user_service: UserService = Depends(get_user_service)
@@ -87,7 +81,7 @@ async def verify_reset_password_code(
 @router.post(
     "/forgot-password/reset/",
     response_model=dict[str, str],
-    responses=get_forgot_password_reset_responses(),
+    responses=auth_docs.reset_forgotten_password(),
 )
 async def reset_password(
     code: str,

@@ -2,12 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_company_service, get_user_service
 from app.api.dependencies.user import get_current_user
-from app.api.docs.user_profile import (
-    get_edit_profile_responses,
-    get_profile_responses,
-    get_reset_password_responses,
-    get_user_companies_responses,
-)
+from app.api.docs.user_profile import user_profile_docs
 from app.models.db.users import User
 from app.models.schemas.companies import CompanyList
 from app.models.schemas.company_user import UserFullSchema
@@ -28,7 +23,7 @@ router = APIRouter(
 @router.get(
     "/",
     response_model=UserFullSchema,
-    responses=get_profile_responses(),
+    responses=user_profile_docs.get_user_profile(),
     response_model_exclude_none=True,
 )
 async def get_user_profile(
@@ -45,7 +40,7 @@ async def get_user_profile(
     "/companies/",
     response_model=list[CompanyList],
     response_model_exclude_none=True,
-    responses=get_user_companies_responses(),
+    responses=user_profile_docs.get_user_companies(),
 )
 async def get_user_companies(
     current_user: User = Depends(get_current_user),
@@ -61,7 +56,7 @@ async def get_user_companies(
     "/edit/",
     response_model=UserFullSchema,
     response_model_exclude_none=True,
-    responses=get_edit_profile_responses(),
+    responses=user_profile_docs.edit_user_profile(),
 )
 async def edit_user_profile(
     data: UserUpdate,
@@ -77,7 +72,7 @@ async def edit_user_profile(
 @router.patch(
     "/edit/reset_password/",
     response_model=PasswordChangeOutput,
-    responses=get_reset_password_responses(),
+    responses=user_profile_docs.reset_password(),
 )
 async def reset_password(
     data: PasswordResetInput,

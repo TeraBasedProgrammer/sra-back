@@ -9,12 +9,12 @@ from app.models.schemas.tags import (
     TagCreateOutput,
     TagSchema,
 )
-from app.repository.company import CompanyMember, CompanyRepository
+from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
-from app.utilities.validators.permission.user import validate_user_company_role
+from app.services.base import BaseService
 
 
-class TagService:
+class TagService(BaseService):
     def __init__(self, tag_repository, company_repository) -> None:
         self.tag_repository: TagRepository = tag_repository
         self.company_repository: CompanyRepository = company_repository
@@ -22,19 +22,15 @@ class TagService:
     async def create_tag(
         self, tag_data: TagCreateInput, current_user_id: int
     ) -> TagCreateInput:
-        if not await self.company_repository.exists_by_id(tag_data.company_id):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Company is not found"
-            )
-
-        members: list[
-            CompanyMember
-        ] = await self.company_repository.get_company_members(tag_data.company_id)
-
-        if not validate_user_company_role(
-            members, current_user_id, (RoleEnum.Owner, RoleEnum.Admin)
-        ):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        await self._validate_instance_exists(
+            self.company_repository, tag_data.company_id
+        )
+        await self._validate_user_permissions(
+            self.company_repository,
+            tag_data.company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin),
+        )
 
         try:
             new_tag_id = await self.tag_repository.create_tag(tag_data)
@@ -48,17 +44,8 @@ class TagService:
     async def get_company_tags(
         self, current_user_id: int, company_id: int
     ) -> list[TagBaseSchema]:
-        if not await self.company_repository.exists_by_id(company_id):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Company is not found"
-            )
-
-        members: list[
-            CompanyMember
-        ] = await self.company_repository.get_company_members(company_id)
-
-        if not validate_user_company_role(members, current_user_id):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        await self._validate_instance_exists(company_id)
+        await self._validate_user_permissions(company_id, current_user_id)
 
         tags: list[Tag] = await self.tag_repository.get_company_tags(company_id)
         return [TagBaseSchema(id=tag.id, title=tag.title) for tag in tags]
@@ -69,17 +56,8 @@ class TagService:
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        if not await self.company_repository.exists_by_id(tag.company_id):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Company is not found"
-            )
-
-        members: list[
-            CompanyMember
-        ] = await self.company_repository.get_company_members(tag.company_id)
-
-        if not validate_user_company_role(members, current_user_id):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        await self._validate_instance_exists(tag.company_id)
+        await self._validate_user_permissions(tag.company_id, current_user_id)
 
         return TagSchema(
             id=tag.id,

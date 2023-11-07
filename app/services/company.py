@@ -5,10 +5,11 @@ from app.models.db.users import User
 from app.models.schemas.companies import CompanyCreate, CompanyCreateSuccess
 from app.models.schemas.company_user import CompanyFullSchema
 from app.repository.company import CompanyRepository
+from app.services.base import BaseService
 from app.utilities.formatters.http_error import validation_error_wrapper
 
 
-class CompanyService:
+class CompanyService(BaseService):
     def __init__(self, company_repository) -> None:
         self.company_repository: CompanyRepository = company_repository
 
@@ -33,10 +34,7 @@ class CompanyService:
         return await self.company_repository.get_user_companies(current_user)
 
     async def get_company_by_id(self, company_id: int) -> CompanyFullSchema:
-        if not await self.company_repository.exists_by_id(company_id):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Company is not found"
-            )
+        await self._validate_instance_exists(self.company_repository, company_id)
 
         company = await self.company_repository.get_company_by_id(company_id)
         return CompanyFullSchema.from_model(company)

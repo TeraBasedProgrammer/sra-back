@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser, RoleEnum
 from app.models.db.users import User
-from app.models.schemas.companies import CompanyCreate, CompanyList
+from app.models.schemas.companies import CompanyCreate, CompanyList, CompanyUpdate
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -74,3 +74,12 @@ class CompanyRepository(BaseRepository):
             logger.debug(f'Retrieved company "{company_id}" members: "{result}"')
 
         return [CompanyMember(id=member[0], role=member[1]) for member in result]
+
+    async def update_company(
+        self, company_id: int, company_data: CompanyUpdate
+    ) -> Company:
+        logger.debug(f"Received data:\n{get_args()}")
+        updated_tag = await self.update(company_id, company_data)
+
+        logger.debug(f'Successfully updatetd company instance "{company_id}"')
+        return updated_tag

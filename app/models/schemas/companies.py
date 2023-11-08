@@ -54,6 +54,6 @@ class UserCompanyM2m(BaseModel):
         from_attributes = True
 
 
-class CompanyUpdate(BaseModel):
+class CompanyUpdate(CompanyBase):
     title: Optional[str] = None
     description: Optional[str] = None

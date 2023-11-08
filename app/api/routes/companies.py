@@ -5,7 +5,11 @@ from app.api.dependencies.services import get_company_service, get_tag_service
 from app.api.dependencies.user import get_current_user, get_current_user_id
 from app.api.docs.companies import company_docs
 from app.models.db.users import User
-from app.models.schemas.companies import CompanyCreate, CompanyCreateSuccess
+from app.models.schemas.companies import (
+    CompanyCreate,
+    CompanyCreateSuccess,
+    CompanyUpdate,
+)
 from app.models.schemas.company_user import CompanyFullSchema
 from app.models.schemas.tags import TagBaseSchema
 from app.services.company import CompanyService
@@ -60,3 +64,23 @@ async def create_company(
     ### Create a new company instance
     """
     return await company_service.create_company(company_data, current_user)
+
+
+@router.post(
+    "/{company_id}/update/",
+    responses=company_docs.update_company(),
+    response_model=CompanyFullSchema,
+    response_model_exclude_none=True,
+)
+async def update_company(
+    company_id: int,
+    company_data: CompanyUpdate,
+    current_user_id: User = Depends(get_current_user_id),
+    company_service: CompanyService = Depends(get_company_service),
+) -> CompanyFullSchema:
+    """
+    ### Update a specific company instance
+    """
+    return await company_service.update_company(
+        company_id, company_data, current_user_id
+    )

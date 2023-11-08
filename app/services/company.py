@@ -92,9 +92,7 @@ class CompanyService(BaseService):
         )
 
         # Validate passed role
-        try:
-            RoleEnum(member_data.role)
-        except ValueError:
+        if member_data.role not in ["admin", "tester", "employee"]:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail=error_wrapper("Invalid role", "role"),

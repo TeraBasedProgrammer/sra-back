@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from app.utilities.formatters.http_error import validation_error_wrapper
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class ResponseDocumentation:
@@ -14,9 +14,7 @@ class ResponseDocumentation:
             "description": description,
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": validation_error_wrapper(error_text, error_field)
-                    }
+                    "example": {"detail": error_wrapper(error_text, error_field)}
                 }
             },
         }

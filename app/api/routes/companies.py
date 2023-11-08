@@ -5,6 +5,7 @@ from app.api.dependencies.services import get_company_service, get_tag_service
 from app.api.dependencies.user import get_current_user, get_current_user_id
 from app.api.docs.companies import company_docs
 from app.models.db.users import User
+from app.models.schemas.auth import UserSignUpOutput
 from app.models.schemas.companies import (
     CompanyCreate,
     CompanyCreateSuccess,
@@ -12,6 +13,7 @@ from app.models.schemas.companies import (
 )
 from app.models.schemas.company_user import CompanyFullSchema
 from app.models.schemas.tags import TagBaseSchema
+from app.models.schemas.users import CompanyMemberInput
 from app.services.company import CompanyService
 from app.services.tag import TagService
 
@@ -67,6 +69,29 @@ async def create_company(
 
 
 @router.post(
+    "/{company_id}/members/add/",
+    status_code=201,
+    responses=company_docs.add_member(),
+    response_model=UserSignUpOutput,
+)
+async def add_company_member(
+    company_id: int,
+    member_data: CompanyMemberInput,
+    current_user_id: User = Depends(get_current_user_id),
+    company_service: CompanyService = Depends(get_company_service),
+):
+    """
+    ### Allows company administration to add new members
+
+    Available roles:
+    1. "admin"
+    2. "tester"
+    3. "employee"
+    """
+    return await company_service.add_member(company_id, member_data, current_user_id)
+
+
+@router.patch(
     "/{company_id}/update/",
     responses=company_docs.update_company(),
     response_model=CompanyFullSchema,

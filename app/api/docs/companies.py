@@ -1,6 +1,7 @@
 from fastapi import status
 
 from app.api.docs.base import ResponseDocumentation
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class CompanyDocumentation(ResponseDocumentation):
@@ -57,8 +58,32 @@ class CompanyDocumentation(ResponseDocumentation):
                 "title",
             ),
             status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
-                ["body", "title"],
-                "String should have at most 25 characters",
+                ["path", "company_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+        }
+
+        return responses
+
+    def add_member(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_company_responses(),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "Invalid role",
+                "role",
+            ),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["path", "company_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+            status.HTTP_403_FORBIDDEN: self._403_response(),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "User with provided email already exists",
+                {
+                    "detail": error_wrapper(
+                        "User with this email already exists", "email"
+                    )
+                },
             ),
         }
 

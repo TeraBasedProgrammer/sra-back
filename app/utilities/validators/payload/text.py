@@ -3,7 +3,7 @@ import re
 from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
-from app.utilities.formatters.http_error import validation_error_wrapper
+from app.utilities.formatters.http_error import error_wrapper
 
 
 def validate_text(value: str, field_name: str):
@@ -13,7 +13,7 @@ def validate_text(value: str, field_name: str):
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=validation_error_wrapper(
+            detail=error_wrapper(
                 "This field may contain only english letters, numbers and special characters (.-'!()/ )",
                 field_name,
             ),

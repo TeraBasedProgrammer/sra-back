@@ -14,7 +14,7 @@ from app.models.schemas.tags import (
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
-from app.utilities.formatters.http_error import validation_error_wrapper
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class TagService(BaseService):
@@ -81,7 +81,7 @@ class TagService(BaseService):
             logger.warning("Validation error: No parameters have been provided")
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail=validation_error_wrapper(
+                detail=error_wrapper(
                     "At least one valid field should be provided", None
                 ),
             )

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import load_only
 
 from app.config.logs.logger import logger
@@ -46,3 +46,15 @@ class TagRepository(BaseRepository):
     async def delete_tag(self, tag_id: int) -> None:
         logger.debug(f"Received data:\n{get_args()}")
         await self.delete(tag_id)
+
+    async def tags_exist_by_id(self, tag_ids: list[int]) -> bool:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        result = await self.async_session.execute(
+            select(func.count(Tag.id)).where(Tag.id.in_(tag_ids))
+        )
+        count = result.scalar()
+
+        if count == len(tag_ids):
+            return True
+        return False

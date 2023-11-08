@@ -30,6 +30,17 @@ class UserBase(BaseModel):
         return validate_phone_number(value)
 
 
+class CompanyMemberInput(UserBase):
+    password: str
+    role: str
+    tags: list[int]
+
+    @field_validator("password")
+    @classmethod
+    def validate(cls, value: str):
+        return validate_password(value)
+
+
 class UserSchema(UserBase):
     id: int
     registered_at: datetime

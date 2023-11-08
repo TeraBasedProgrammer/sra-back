@@ -18,8 +18,10 @@ def get_user_service(
 
 def get_company_service(
     company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
+    user_repository: UserRepository = Depends(get_repository(UserRepository)),
+    tag_repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> CompanyService:
-    service = CompanyService(company_repository)
+    service = CompanyService(company_repository, user_repository, tag_repository)
     return service
 
 

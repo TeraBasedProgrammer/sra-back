@@ -24,7 +24,7 @@ from app.models.schemas.users import (
 from app.repository.user import UserRepository
 from app.securities.authorization.auth_handler import auth_handler
 from app.services.base import BaseService
-from app.utilities.formatters.http_error import validation_error_wrapper
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class UserService(BaseService):
@@ -75,7 +75,7 @@ class UserService(BaseService):
             logger.warning("Invalid password was provided")
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail=validation_error_wrapper("Invalid password", "password"),
+                detail=error_wrapper("Invalid password", "password"),
             )
 
         logger.info(f'User "{user_data.email}" successfully logged in the system')
@@ -98,7 +98,7 @@ class UserService(BaseService):
             logger.warning("Validation error: No parameters have been provided")
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail=validation_error_wrapper(
+                detail=error_wrapper(
                     "At least one valid field should be provided", None
                 ),
             )
@@ -118,7 +118,7 @@ class UserService(BaseService):
             logger.warning("Invalid old password was provided")
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail=validation_error_wrapper("Invalid old password", "old_password"),
+                detail=error_wrapper("Invalid old password", "old_password"),
             )
 
         # Validate the new password does not match the old password
@@ -139,9 +139,7 @@ class UserService(BaseService):
         if not await self.user_repository.exists_by_email(user_email):
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
-                detail=validation_error_wrapper(
-                    "User with this email is not found", "email"
-                ),
+                detail=error_wrapper("User with this email is not found", "email"),
             )
 
         user: User = await self.user_repository.get_user_by_email(user_email)
@@ -164,7 +162,7 @@ class UserService(BaseService):
         if not await redis.get(code):
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                detail=validation_error_wrapper("Invalid code", "code"),
+                detail=error_wrapper("Invalid code", "code"),
             )
 
         return {"status": "Valid"}

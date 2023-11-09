@@ -77,3 +77,7 @@ class BaseRepository:
     async def save(self, obj: Any):
         self.async_session.add(obj)
         await self.async_session.commit()
+
+    async def save_many(self, objects: list[Any]):
+        self.async_session.add_all(objects)
+        await self.async_session.commit()

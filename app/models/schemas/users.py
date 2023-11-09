@@ -41,6 +41,11 @@ class CompanyMemberInput(UserBase):
         return validate_password(value)
 
 
+class CompanyMemberUpdate(BaseModel):
+    role: Optional[str] = None
+    tags: Optional[list[int]] = None
+
+
 class UserSchema(UserBase):
     id: int
     registered_at: datetime
@@ -98,10 +103,6 @@ class PasswordForgotInput(BaseModel):
 
 class PasswordChangeOutput(BaseModel):
     message: str
-
-
-class DeletedInstanceResponse(BaseModel):
-    deleted_instance_id: int
 
 
 class UpdateUserScore(BaseModel):

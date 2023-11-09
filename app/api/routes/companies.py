@@ -11,9 +11,9 @@ from app.models.schemas.companies import (
     CompanyCreateSuccess,
     CompanyUpdate,
 )
-from app.models.schemas.company_user import CompanyFullSchema
+from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
 from app.models.schemas.tags import TagBaseSchema
-from app.models.schemas.users import CompanyMemberInput
+from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate
 from app.services.company import CompanyService
 from app.services.tag import TagService
 
@@ -56,6 +56,24 @@ async def get_tags_list(
     return await tag_service.get_company_tags(current_user_id, company_id)
 
 
+@router.get(
+    "/{company_id}/members/{member_id}/",
+    response_model=UserFullSchema,
+    response_model_exclude_none=True,
+    # respones=company_docs.get_company_member(),
+)
+async def get_company_member(
+    company_id: int,
+    member_id: int,
+    current_user_id: User = Depends(get_current_user_id),
+    company_service: CompanyService = Depends(get_company_service),
+) -> UserFullSchema:
+    """
+    ### Allows company administration to retrieve a specific member
+    """
+    return await company_service.get_member(company_id, member_id, current_user_id)
+
+
 @router.post("/create/", status_code=201, responses=company_docs.create_company())
 async def create_company(
     company_data: CompanyCreate,
@@ -79,7 +97,7 @@ async def add_company_member(
     member_data: CompanyMemberInput,
     current_user_id: User = Depends(get_current_user_id),
     company_service: CompanyService = Depends(get_company_service),
-):
+) -> UserSignUpOutput:
     """
     ### Allows company administration to add new members
 
@@ -89,6 +107,32 @@ async def add_company_member(
     3. "employee"
     """
     return await company_service.add_member(company_id, member_data, current_user_id)
+
+
+@router.patch(
+    "/{company_id}/members/{member_id}/update/",
+    response_model=UserFullSchema,
+    response_model_exclude_none=True,
+    # respones=company_docs.update_company_member(),
+)
+async def update_company_member(
+    company_id: int,
+    member_id: int,
+    member_data: CompanyMemberUpdate,
+    current_user_id: User = Depends(get_current_user_id),
+    company_service: CompanyService = Depends(get_company_service),
+) -> UserFullSchema:
+    """
+    ### Allows company administration to update a specific member
+
+    Available roles:
+    1. "admin"
+    2. "tester"
+    3. "employee"
+    """
+    return await company_service.update_member(
+        company_id, member_id, member_data, current_user_id
+    )
 
 
 @router.patch(
@@ -108,4 +152,25 @@ async def update_company(
     """
     return await company_service.update_company(
         company_id, company_data, current_user_id
+    )
+
+
+@router.delete(
+    "/{company_id}/members/{member_id}/delete/",
+    response_model=None,
+    # respones=company_docs.delete_company_member(),
+    status_code=204,
+)
+async def delete_company_member(
+    company_id: int,
+    member_id: int,
+    member_data: CompanyMemberInput,
+    current_user_id: User = Depends(get_current_user_id),
+    company_service: CompanyService = Depends(get_company_service),
+):
+    """
+    ### Allows company administration to delete a specific member
+    """
+    return await company_service.delete_member(
+        company_id, member_id, member_data, current_user_id
     )

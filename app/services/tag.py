@@ -1,7 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
-from app.config.logs.logger import logger
 from app.models.db.companies import RoleEnum
 from app.models.db.users import Tag
 from app.models.schemas.tags import (
@@ -14,7 +13,6 @@ from app.models.schemas.tags import (
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
-from app.utilities.formatters.http_error import error_wrapper
 
 
 class TagService(BaseService):
@@ -28,7 +26,7 @@ class TagService(BaseService):
         await self._validate_instance_exists(
             self.company_repository, tag_data.company_id
         )
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository,
             tag_data.company_id,
             current_user_id,
@@ -48,7 +46,7 @@ class TagService(BaseService):
         self, current_user_id: int, company_id: int
     ) -> list[TagBaseSchema]:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository, company_id, current_user_id
         )
 
@@ -61,7 +59,7 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository, tag.company_id, current_user_id
         )
 
@@ -75,20 +73,11 @@ class TagService(BaseService):
         self, tag_id: int, tag_data: TagUpdateInput, current_user_id: int
     ) -> TagSchema:
         await self._validate_instance_exists(self.tag_repository, tag_id)
-
-        new_fields: dict = tag_data.model_dump(exclude_none=True)
-        if new_fields == {}:
-            logger.warning("Validation error: No parameters have been provided")
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper(
-                    "At least one valid field should be provided", None
-                ),
-            )
+        self._validate_update_data(tag_data)
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository,
             tag.company_id,
             current_user_id,
@@ -107,7 +96,7 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository,
             tag.company_id,
             current_user_id,

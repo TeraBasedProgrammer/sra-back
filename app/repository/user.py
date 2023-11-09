@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import EmailStr
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import joinedload
 
 from app.config.logs.logger import logger
-from app.models.db.users import User
+from app.models.db.users import TagUser, User
 from app.models.schemas.users import UserCreate, UserUpdate
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
@@ -103,7 +103,7 @@ class UserRepository(BaseRepository):
         logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)
 
-        logger.debug(f'Successfully updatetd user instance "{user_id}"')
+        logger.debug(f'Successfully updated user instance "{user_id}"')
         return updated_user
 
     # TODO: test
@@ -113,3 +113,12 @@ class UserRepository(BaseRepository):
 
         logger.debug(f'Successfully deleted user "{result}" from the database')
         return result
+
+    async def delete_related_tag_user(self, user_id: int) -> None:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        # Delete all relataed TagUser objects
+        await self.async_session.execute(
+            delete(TagUser).where(TagUser.user_id == user_id)
+        )
+        await self.async_session.commit()

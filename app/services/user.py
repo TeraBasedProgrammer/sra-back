@@ -93,15 +93,7 @@ class UserService(BaseService):
         logger.info(f'Updating user profile of the user "{current_user}"')
 
         # Validate if data was provided
-        new_fields = data.model_dump(exclude_none=True)
-        if new_fields == {}:
-            logger.warning("Validation error: No parameters have been provided")
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper(
-                    "At least one valid field should be provided", None
-                ),
-            )
+        self._validate_update_data(data)
 
         updated_user = await self.user_repository.update_user(current_user.id, data)
 

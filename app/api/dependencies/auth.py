@@ -18,7 +18,6 @@ async def auth_wrapper(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
     user_data = await auth_handler.decode_token(auth.credentials)
-    print(user_data)
 
     # Create new user (or skip if it exists) if token is received from Auth0
     if user_data["auth0"]:

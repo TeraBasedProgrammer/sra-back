@@ -12,8 +12,8 @@ from app.models.schemas.companies import (
     CompanyCreateSuccess,
     CompanyUpdate,
 )
-from app.models.schemas.company_user import CompanyFullSchema
-from app.models.schemas.users import CompanyMemberInput, UserCreate
+from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
+from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate, UserCreate
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.repository.user import UserRepository
@@ -27,6 +27,23 @@ class CompanyService(BaseService):
         self.company_repository: CompanyRepository = company_repository
         self.user_repository: UserRepository = user_repository
         self.tag_repository: TagRepository = tag_repository
+
+    async def _validate_passed_role(self, member_data: Any) -> None:
+        if member_data.role not in ["admin", "tester", "employee"]:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper("Invalid role", "role"),
+            )
+
+    async def _validate_tag_ids(self, member_data: Any) -> None:
+        if not await self.tag_repository.tags_exist_by_id(member_data.tags):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail=error_wrapper(
+                    "One or more tags are not found. Ensure you passed the correct values",
+                    "tags",
+                ),
+            )
 
     async def create_company(
         self, company_data: CompanyCreate, current_user: User
@@ -56,18 +73,8 @@ class CompanyService(BaseService):
         self, company_id: int, company_data: CompanyUpdate, current_user_id: int
     ) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
-
-        new_fields: dict = company_data.model_dump(exclude_none=True)
-        if new_fields == {}:
-            logger.warning("Validation error: No parameters have been provided")
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper(
-                    "At least one valid field should be provided", None
-                ),
-            )
-
-        await self._validate_user_permissions(
+        self._validate_update_data(company_data)
+        await self._validate_user_membership(
             self.company_repository,
             company_id,
             current_user_id,
@@ -80,33 +87,37 @@ class CompanyService(BaseService):
         )
         return CompanyFullSchema.from_model(updated_company)
 
+    async def get_member(
+        self, company_id: int, member_id: int, current_user_id: int
+    ) -> UserFullSchema:
+        await self._validate_instance_exists(self.company_repository, company_id)
+        await self._validate_user_membership(
+            self.company_repository,
+            company_id,
+            current_user_id,
+        )
+
+        # Validate if user with 'member_id' exists and is a company member
+        await self._validate_company_member(
+            self.user_repository, self.company_repository, member_id, company_id
+        )
+
+        user = await self.user_repository.get_user_by_id(member_id)
+        return UserFullSchema.from_model(user)
+
     async def add_member(
         self, company_id: int, member_data: CompanyMemberInput, current_user_id: int
     ) -> UserSignUpOutput:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_permissions(
+        await self._validate_user_membership(
             self.company_repository,
             company_id,
             current_user_id,
             (RoleEnum.Owner, RoleEnum.Admin),
         )
 
-        # Validate passed role
-        if member_data.role not in ["admin", "tester", "employee"]:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper("Invalid role", "role"),
-            )
-
-        # Validate passed tag ids
-        if not await self.tag_repository.tags_exist_by_id(member_data.tags):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                detail=error_wrapper(
-                    "One or more tags are not found. Ensure you passed the correct values",
-                    "tags",
-                ),
-            )
+        await self._validate_passed_role(member_data)
+        await self._validate_tag_ids(member_data)
 
         # Hash user password
         member_data.password = auth_handler.get_password_hash(member_data.password)
@@ -142,3 +153,57 @@ class CompanyService(BaseService):
                 status.HTTP_409_CONFLICT,
                 detail=error_wrapper("User with this email already exists", "email"),
             )
+
+    async def update_member(
+        self,
+        company_id: int,
+        member_id: int,
+        member_data: CompanyMemberUpdate,
+        current_user_id: int,
+    ) -> UserFullSchema:
+        await self._validate_instance_exists(self.company_repository, company_id)
+        await self._validate_user_membership(
+            self.company_repository,
+            company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin),
+        )
+        self._validate_update_data(member_data)
+
+        # Validate if user with 'member_id' exists and is a company member
+        await self._validate_company_member(
+            self.user_repository, self.company_repository, member_id, company_id
+        )
+
+        # Validate if user tries to update its data
+        if current_user_id == member_id:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    "You can't change your own company data", "member_id"
+                ),
+            )
+
+        # Validate if member user is not the owner
+        member = await self.user_repository.get_user_by_id(member_id)
+        for company in member.companies:
+            if company.companies.id == company_id and company.role == RoleEnum.Owner:
+                raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+        if member_data.tags:
+            await self._validate_tag_ids(member_data)
+
+            # Recreate tags for the member
+            await self.user_repository.delete_related_tag_user(member_id)
+            logger.critical(type(member.tags))
+            await self.user_repository.save_many(
+                [TagUser(user_id=member_id, tag_id=tag) for tag in member_data.tags]
+            )
+
+        if member_data.role:
+            await self._validate_passed_role(member_data)
+            member.companies[0].role = RoleEnum(member_data.role)
+            await self.user_repository.save(member)
+
+        new_member = await self.user_repository.get_user_by_id(member_id)
+        return UserFullSchema.from_model(new_member)

@@ -1,11 +1,40 @@
+from typing import Any
+
 from app.models.db.companies import Company
 from app.models.db.users import User
 from app.models.schemas.companies import CompanySchema, UserCompanyM2m
 from app.models.schemas.users import TagBaseSchema, UserSchema
 
 
+def _get_response_example(for_company: bool) -> dict[str, Any]:
+    response = {
+        "example": {
+            "email": "user@example.com",
+            "name": "string",
+            "phone_number": "+380500505050",
+            "id": 0,
+            "registered_at": "timestamp",
+            "average_score": 0,
+            "tags": [{"id": 0, "title": "string"}],
+            "companies": [
+                {"id": 0, "title": "string", "name": "string", "role": "owner"}
+            ],
+        }
+    }
+
+    if for_company:
+        response["example"]["companies"][0].pop("name")
+    else:
+        response["example"]["companies"][0].pop("title")
+
+    return response
+
+
 class UserFullSchema(UserSchema):
     companies: list[UserCompanyM2m]
+
+    class Config:
+        json_schema_extra = _get_response_example(for_company=False)
 
     @classmethod
     def from_model(cls, user_model: User):
@@ -50,3 +79,6 @@ class CompanyFullSchema(CompanySchema):
                 for user in company_model.users
             ],
         )
+
+    class Config:
+        json_schema_extra = _get_response_example(for_company=True)

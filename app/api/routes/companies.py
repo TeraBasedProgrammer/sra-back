@@ -60,7 +60,7 @@ async def get_tags_list(
     "/{company_id}/members/{member_id}/",
     response_model=UserFullSchema,
     response_model_exclude_none=True,
-    # respones=company_docs.get_company_member(),
+    responses=company_docs.get_company_member(),
 )
 async def get_company_member(
     company_id: int,
@@ -113,7 +113,7 @@ async def add_company_member(
     "/{company_id}/members/{member_id}/update/",
     response_model=UserFullSchema,
     response_model_exclude_none=True,
-    # respones=company_docs.update_company_member(),
+    responses=company_docs.update_company_member(),
 )
 async def update_company_member(
     company_id: int,
@@ -158,7 +158,7 @@ async def update_company(
 @router.delete(
     "/{company_id}/members/{member_id}/delete/",
     response_model=None,
-    # respones=company_docs.delete_company_member(),
+    responses=company_docs.delete_company_member(),
     status_code=204,
 )
 async def delete_company_member(

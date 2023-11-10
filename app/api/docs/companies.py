@@ -65,6 +65,18 @@ class CompanyDocumentation(ResponseDocumentation):
 
         return responses
 
+    def get_company_member(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_company_responses(),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["path", "company_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+            status.HTTP_403_FORBIDDEN: self._403_response(),
+        }
+
+        return responses
+
     def add_member(self) -> dict[int, dict]:
         responses: dict[int, dict] = {
             **self._default_company_responses(),
@@ -85,6 +97,38 @@ class CompanyDocumentation(ResponseDocumentation):
                     )
                 },
             ),
+        }
+
+        return responses
+
+    def update_company_member(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_company_responses(),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "Invalid role",
+                "role",
+            ),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["path", "company_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+            status.HTTP_403_FORBIDDEN: self._403_response(),
+        }
+
+        return responses
+
+    def delete_company_member(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_company_responses(),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "You can't delete yourself from the company",
+                "member_id",
+            ),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["path", "company_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+            status.HTTP_403_FORBIDDEN: self._403_response(),
         }
 
         return responses

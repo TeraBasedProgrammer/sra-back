@@ -45,6 +45,15 @@ class CompanyService(BaseService):
                 ),
             )
 
+    def _validate_not_same_id(
+        self, current_user_id: int, member_id: int, error_message: str
+    ) -> None:
+        if current_user_id == member_id:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(error_message, "member_id"),
+            )
+
     async def create_company(
         self, company_data: CompanyCreate, current_user: User
     ) -> CompanyCreateSuccess:
@@ -176,13 +185,9 @@ class CompanyService(BaseService):
         )
 
         # Validate if user tries to update its data
-        if current_user_id == member_id:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail=error_wrapper(
-                    "You can't change your own company data", "member_id"
-                ),
-            )
+        self._validate_not_same_id(
+            current_user_id, member_id, "You can't change your own company data"
+        )
 
         # Validate if member user is not the owner
         member = await self.user_repository.get_user_by_id(member_id)
@@ -207,3 +212,30 @@ class CompanyService(BaseService):
 
         new_member = await self.user_repository.get_user_by_id(member_id)
         return UserFullSchema.from_model(new_member)
+
+    async def delete_member(self, company_id, member_id, current_user_id) -> None:
+        await self._validate_instance_exists(self.company_repository, company_id)
+        await self._validate_user_membership(
+            self.company_repository,
+            company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin),
+        )
+
+        # Validate if user with 'member_id' exists and is a company member
+        await self._validate_company_member(
+            self.user_repository, self.company_repository, member_id, company_id
+        )
+
+        # Validate if user tries to update its data
+        self._validate_not_same_id(
+            current_user_id, member_id, "You can't delete yourself from the company"
+        )
+
+        # Validate if member user is not the owner
+        company_members = await self.company_repository.get_company_members(company_id)
+        for member in company_members:
+            if member.id == member_id and member.role == RoleEnum.Owner:
+                raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+        await self.user_repository.delete_user(member_id)

@@ -164,13 +164,10 @@ async def update_company(
 async def delete_company_member(
     company_id: int,
     member_id: int,
-    member_data: CompanyMemberInput,
     current_user_id: User = Depends(get_current_user_id),
     company_service: CompanyService = Depends(get_company_service),
 ):
     """
     ### Allows company administration to delete a specific member
     """
-    return await company_service.delete_member(
-        company_id, member_id, member_data, current_user_id
-    )
+    return await company_service.delete_member(company_id, member_id, current_user_id)

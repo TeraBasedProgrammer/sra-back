@@ -33,14 +33,23 @@ def validate_name(value: str):
 def validate_phone_number(value: str):
     if not value:
         return value
-    if value[0] != "+":
+    if not (8 <= len(value) <= 20):
+        logger.warning("Validation error: 'phone_number' has invalid length")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_wrapper(
+                "Phone number should contain from 8 to 20 characters", "phone_number"
+            ),
+        )
+    if value[0] != "+" or not value[1:].isdigit():
         logger.warning(
-            "Validation error: 'phone_number' field does not contain '+' character "
+            "Validation error: 'phone_number' field does not contain '+' character or contains incorrect characters"
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_wrapper(
-                "Phone number should start with '+' character", "phone_number"
+                "Phone number should start with '+' and contain only numeric characters",
+                "phone_number",
             ),
         )
     return value

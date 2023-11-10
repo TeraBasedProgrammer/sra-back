@@ -15,9 +15,7 @@ from app.utilities.validators.payload.user import (
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = Field(max_length=50, min_length=2, default=None)
-    phone_number: Optional[str] = Field(
-        min_length=10, max_length=20, examples=["+380500505050"], default=None
-    )
+    phone_number: Optional[str] = Field(default=None)
 
     @field_validator("name")
     @classmethod
@@ -66,9 +64,7 @@ class UserCreate(UserBase):
 # TODO: figure out how to simplify
 class UserUpdate(BaseModel):
     name: Optional[str] = Field(max_length=50, min_length=2, default=None)
-    phone_number: Optional[str] = Field(
-        min_length=10, max_length=20, examples=["+380500505050"], default=None
-    )
+    phone_number: Optional[str] = Field(default=None)
 
     @field_validator("name")
     @classmethod

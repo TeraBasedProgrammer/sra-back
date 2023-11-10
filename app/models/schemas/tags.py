@@ -26,14 +26,14 @@ class TagSchema(TagBaseSchema):
 
 # TODO: find out how to simplify
 class TagCreateInput(BaseModel):
-    title: str = Field(min_length=4, max_length=30)
+    title: str
     description: str
     company_id: int
 
     @field_validator("title")
     @classmethod
     def validate_tag_title(cls, value):
-        return validate_text(value, "title")
+        return validate_text(value, "title", min_length=4, max_length=30)
 
     @field_validator("description")
     @classmethod
@@ -47,5 +47,10 @@ class TagCreateOutput(BaseModel):
 
 # TODO: find out how to simplify
 class TagUpdateInput(BaseModel):
-    title: Optional[str] = Field(min_length=4, max_length=30, default=None)
+    title: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
+
+    @field_validator("title")
+    @classmethod
+    def validate_tag_title(cls, value):
+        return validate_text(value, "title")

@@ -8,13 +8,13 @@ from app.utilities.validators.payload.text import validate_text
 
 
 class CompanyBase(BaseModel):
-    title: str = Field(max_length=25, min_length=5)
+    title: str
     description: str
 
     @field_validator("title")
     @classmethod
     def validate_company_title(cls, value):
-        return validate_text(value, "title")
+        return validate_text(value, "title", min_length=5, max_length=25)
 
     @field_validator("description")
     @classmethod

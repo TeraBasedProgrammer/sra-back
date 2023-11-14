@@ -12,7 +12,7 @@ class TagBaseSchema(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_tag_title(cls, value):
-        return validate_text(value, "title")
+        return validate_text(value, "title", min_length=4, max_length=30)
 
 
 class TagSchema(TagBaseSchema):
@@ -21,7 +21,7 @@ class TagSchema(TagBaseSchema):
     @field_validator("description")
     @classmethod
     def validate_tag_description(cls, value):
-        return validate_text(value, "description")
+        return validate_text(value, "description", min_length=25, max_length=3000)
 
 
 # TODO: find out how to simplify
@@ -38,7 +38,7 @@ class TagCreateInput(BaseModel):
     @field_validator("description")
     @classmethod
     def validate_tag_description(cls, value):
-        return validate_text(value, "description")
+        return validate_text(value, "description", min_length=25, max_length=3000)
 
 
 class TagCreateOutput(BaseModel):

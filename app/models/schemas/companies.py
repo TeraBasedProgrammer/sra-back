@@ -19,7 +19,7 @@ class CompanyBase(BaseModel):
     @field_validator("description")
     @classmethod
     def validate_description(cls, value):
-        return validate_text(value, "description")
+        return validate_text(value, "description", min_length=25, max_length=3000)
 
 
 class CompanyCreate(CompanyBase):

@@ -5,8 +5,10 @@ from fastapi import HTTPException, status
 
 from app.config.logs.logger import logger
 from app.utilities.formatters.http_error import error_wrapper
+from app.utilities.validators.payload.string_stripper import string_stripper
 
 
+@string_stripper
 def validate_text(
     value: str,
     field_name: str,

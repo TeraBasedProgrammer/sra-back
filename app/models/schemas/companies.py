@@ -9,7 +9,7 @@ from app.utilities.validators.payload.text import validate_text
 
 class CompanyBase(BaseModel):
     title: str
-    description: str
+    description: Optional[str] = None
 
     @field_validator("title")
     @classmethod

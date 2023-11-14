@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +11,7 @@ from app.models.schemas.companies import (
     CompanyCreate,
     CompanyCreateSuccess,
     CompanyUpdate,
+    UserCompanyM2m,
 )
 from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
 from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate, UserCreate
@@ -69,8 +70,19 @@ class CompanyService(BaseService):
                 detail=error_wrapper("Company with this title already exists", "title"),
             )
 
-    async def get_user_companies(self, current_user: User):
-        return await self.company_repository.get_user_companies(current_user)
+    async def get_user_companies(
+        self, current_user_id: int
+    ) -> Optional[list[UserCompanyM2m]]:
+        companies: list[Company] = await self.company_repository.get_user_companies(
+            current_user_id
+        )
+        if companies:
+            return [
+                UserCompanyM2m(title=company.title, role=company.role, id=company.id)
+                for company in companies
+            ]
+
+        return []
 
     async def get_company_by_id(self, company_id: int) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)

@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser, RoleEnum
 from app.models.db.users import User
-from app.models.schemas.companies import CompanyCreate, CompanyList, CompanyUpdate
+from app.models.schemas.companies import CompanyCreate, CompanyUpdate
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
 
@@ -36,19 +36,16 @@ class CompanyRepository(BaseRepository):
         logger.debug("Successfully inserted new company instance into the database")
         return new_company.id
 
-    async def get_user_companies(self, current_user: User) -> list[CompanyList]:
+    async def get_user_companies(self, current_user_id: int) -> list[Company]:
         query = (
             select(Company)
-            .options(joinedload(Company.users))
-            .where(CompanyUser.user_id == current_user.id)
-        ).with_only_columns(Company.id, Company.title)
+            .join(CompanyUser, CompanyUser.user_id == current_user_id)
+            .where(CompanyUser.user_id == current_user_id)
+        ).with_only_columns(Company.id, Company.title, CompanyUser.role)
         response = await self.async_session.execute(query)
+
         result: list[Company] = response.unique()
-        if result:
-            return [
-                CompanyList(id=company.id, title=company.title) for company in result
-            ]
-        return []
+        return result
 
     async def get_company_by_id(self, company_id: int) -> Company:
         logger.debug(f"Received data:\n{get_args()}")

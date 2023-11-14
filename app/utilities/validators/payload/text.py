@@ -15,6 +15,9 @@ def validate_text(
     min_length: Optional[int] = None,
     max_length: Optional[int] = None,
 ):
+    if not value:
+        return value
+    
     if min_length and max_length:
         if not min_length <= len(value) <= max_length:
             logger.warning(f"Validation error: {field_name} has invalid length")

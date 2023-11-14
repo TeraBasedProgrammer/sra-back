@@ -14,7 +14,7 @@ from app.utilities.validators.payload.user import (
 
 class UserBase(BaseModel):
     email: EmailStr
-    name: Optional[str] = Field(max_length=50, min_length=2, default=None)
+    name: Optional[str] = Field(default=None)
     phone_number: Optional[str] = Field(default=None)
 
     @field_validator("name")

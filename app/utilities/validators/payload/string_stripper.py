@@ -1,6 +1,8 @@
 def string_stripper(func):
     def wrapper(*args, **kwargs):
         value = args[0]
+        if not value:
+            return func(*args, **kwargs)
 
         # Remove all extra space characters in the input string
         stripped_value = " ".join(

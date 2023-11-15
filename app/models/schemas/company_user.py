@@ -16,16 +16,15 @@ def _get_response_example(for_company: bool) -> dict[str, Any]:
             "registered_at": "timestamp",
             "average_score": 0,
             "tags": [{"id": 0, "title": "string"}],
-            "companies": [
-                {"id": 0, "title": "string", "name": "string", "role": "owner"}
-            ],
+            "users": [{"id": 0, "name": "string", "role": "owner"}],
+            "companies": [{"id": 0, "title": "string", "role": "owner"}],
         }
     }
 
     if for_company:
-        response["example"]["companies"][0].pop("name")
+        response["example"].pop("companies")
     else:
-        response["example"]["companies"][0].pop("title")
+        response["example"].pop("users")
 
     return response
 

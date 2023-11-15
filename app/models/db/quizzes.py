@@ -1,7 +1,6 @@
 import enum
 
 from sqlalchemy import (
-    TIMESTAMP,
     Boolean,
     Column,
     Enum,
@@ -35,8 +34,10 @@ class Quiz(Base):
     completion_time = Column(Integer, nullable=False)
 
     # Deadlines
-    start_time = Column(TIMESTAMP, nullable=True)
-    end_time = Column(TIMESTAMP, nullable=True)
+    start_date = Column(String, nullable=False)
+    end_date = Column(String, nullable=False)
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
 
     questions = relationship("Question", back_populates="quiz", lazy="select")
     attempts = relationship("Attempt", back_populates="quiz", lazy="select")
@@ -69,7 +70,6 @@ class Answer(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=True)
-    picture_url = Column(String, nullable=True)
     is_correct = Column(Boolean, nullable=False, default=False)
     question_id = Column(ForeignKey("questions.id", ondelete="CASCADE"))
 

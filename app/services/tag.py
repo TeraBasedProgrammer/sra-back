@@ -26,7 +26,7 @@ class TagService(BaseService):
         await self._validate_instance_exists(
             self.company_repository, tag_data.company_id
         )
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag_data.company_id,
             current_user_id,
@@ -46,7 +46,7 @@ class TagService(BaseService):
         self, current_user_id: int, company_id: int
     ) -> list[TagBaseSchema]:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository, company_id, current_user_id
         )
 
@@ -54,12 +54,11 @@ class TagService(BaseService):
         return [TagBaseSchema(id=tag.id, title=tag.title) for tag in tags]
 
     async def get_tag_by_id(self, current_user_id: int, tag_id: int) -> TagSchema:
-        if not await self.tag_repository.exists_by_id(tag_id):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Tag is not found")
+        await self._validate_instance_exists(self.tag_repository, tag_id)
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository, tag.company_id, current_user_id
         )
 
@@ -77,7 +76,7 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag.company_id,
             current_user_id,
@@ -96,7 +95,7 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag.company_id,
             current_user_id,

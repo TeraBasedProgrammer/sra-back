@@ -14,15 +14,15 @@ from app.utilities.validators.permission.user import validate_user_company_role
 
 class BaseService:
     async def _validate_instance_exists(
-        self, repository: BaseRepository, company_id: int
+        self, repository: BaseRepository, instance_id: int
     ) -> None:
-        if not await repository.exists_by_id(company_id):
+        if not await repository.exists_by_id(instance_id):
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail=f"{repository.model.__name__} is not found",
             )
 
-    async def _validate_user_membership(
+    async def _validate_user_permissions(
         self,
         company_repository: CompanyRepository,
         company_id: int,
@@ -61,7 +61,7 @@ class BaseService:
         if not member_user_exists:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Member is not found")
 
-        user_is_member = await self._validate_user_membership(
+        user_is_member = await self._validate_user_permissions(
             company_repository, company_id, member_id, raise_exception=False
         )
 

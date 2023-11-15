@@ -39,7 +39,7 @@ class Quiz(Base):
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
 
-    questions = relationship("Question", back_populates="quiz", lazy="select")
+    questions = relationship("Question", back_populates="quiz", lazy="joined")
     attempts = relationship("Attempt", back_populates="quiz", lazy="select")
     tags = relationship("TagQuiz", back_populates="quizzes", lazy="select")
 
@@ -60,7 +60,7 @@ class Question(Base):
     type = Column(Enum(QuestionTypeEnum), nullable=False)
 
     quiz = relationship("Quiz", back_populates="questions", lazy="select")
-    answers = relationship("Answer", back_populates="question", lazy="select")
+    answers = relationship("Answer", back_populates="question", lazy="joined")
 
     __table_args__ = (UniqueConstraint("title", "quiz_id", name="_question_uc"),)
 

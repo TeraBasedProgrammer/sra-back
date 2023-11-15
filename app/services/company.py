@@ -95,7 +95,7 @@ class CompanyService(BaseService):
     ) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
         self._validate_update_data(company_data)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -112,7 +112,7 @@ class CompanyService(BaseService):
         self, company_id: int, member_id: int, current_user_id: int
     ) -> UserFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -130,7 +130,7 @@ class CompanyService(BaseService):
         self, company_id: int, member_data: CompanyMemberInput, current_user_id: int
     ) -> UserSignUpOutput:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -183,7 +183,7 @@ class CompanyService(BaseService):
         current_user_id: int,
     ) -> UserFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -227,7 +227,7 @@ class CompanyService(BaseService):
 
     async def delete_member(self, company_id, member_id, current_user_id) -> None:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,

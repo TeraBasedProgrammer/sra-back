@@ -2,9 +2,11 @@ from fastapi import Depends
 
 from app.api.dependencies.repository import get_repository
 from app.repository.company import CompanyRepository
+from app.repository.quiz import QuizRepository
 from app.repository.tag import TagRepository
 from app.repository.user import UserRepository
 from app.services.company import CompanyService
+from app.services.quiz import QuizService
 from app.services.tag import TagService
 from app.services.user import UserService
 
@@ -28,6 +30,14 @@ def get_company_service(
 def get_tag_service(
     tag_repository: TagRepository = Depends(get_repository(TagRepository)),
     company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
-) -> CompanyService:
+) -> TagService:
     service = TagService(tag_repository, company_repository)
+    return service
+
+
+def get_quiz_service(
+    quiz_repository: QuizRepository = Depends(get_repository(QuizRepository)),
+    company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
+) -> QuizService:
+    service = QuizService(quiz_repository, company_repository)
     return service

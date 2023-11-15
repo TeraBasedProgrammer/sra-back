@@ -66,7 +66,7 @@ class CompanyService(BaseService):
             return CompanyCreateSuccess(id=company_id)
         except IntegrityError:
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_409_CONFLICT,
                 detail=error_wrapper("Company with this title already exists", "title"),
             )
 
@@ -102,11 +102,17 @@ class CompanyService(BaseService):
             (RoleEnum.Owner,),
         )
 
-        await self.company_repository.update_company(company_id, company_data)
-        updated_company: Company = await self.company_repository.get_company_by_id(
-            company_id
-        )
-        return CompanyFullSchema.from_model(updated_company)
+        try:
+            await self.company_repository.update_company(company_id, company_data)
+            updated_company: Company = await self.company_repository.get_company_by_id(
+                company_id
+            )
+            return CompanyFullSchema.from_model(updated_company)
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper("Company with this title already exists", "title"),
+            )
 
     async def get_member(
         self, company_id: int, member_id: int, current_user_id: int

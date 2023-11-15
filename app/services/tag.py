@@ -13,6 +13,7 @@ from app.models.schemas.tags import (
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class TagService(BaseService):
@@ -39,7 +40,9 @@ class TagService(BaseService):
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                detail="The company already has a tag with provided title, try again",
+                detail=error_wrapper(
+                    "The company already has a tag with provided title", "title"
+                ),
             )
 
     async def get_company_tags(
@@ -83,12 +86,20 @@ class TagService(BaseService):
             (RoleEnum.Owner, RoleEnum.Admin),
         )
 
-        updated_tag: Tag = await self.tag_repository.update_tag(tag_id, tag_data)
-        return TagSchema(
-            id=updated_tag.id,
-            title=updated_tag.title,
-            description=updated_tag.description,
-        )
+        try:
+            updated_tag: Tag = await self.tag_repository.update_tag(tag_id, tag_data)
+            return TagSchema(
+                id=updated_tag.id,
+                title=updated_tag.title,
+                description=updated_tag.description,
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper(
+                    "The company already has a tag with provided title", "title"
+                ),
+            )
 
     async def delete_tag(self, tag_id: int, current_user_id: int) -> None:
         await self._validate_instance_exists(self.tag_repository, tag_id)

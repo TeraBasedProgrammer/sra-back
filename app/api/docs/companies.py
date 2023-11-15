@@ -42,6 +42,14 @@ class CompanyDocumentation(ResponseDocumentation):
                 "This field may contain only english letters, numbers and special characters (.-'!()/ )",
                 "title",
             ),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "Company with provided title already exists",
+                {
+                    "detail": error_wrapper(
+                        "Company with this title already exists", "title"
+                    )
+                },
+            ),
             status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
                 ["body", "title"],
                 "String should have at most 25 characters",
@@ -56,6 +64,14 @@ class CompanyDocumentation(ResponseDocumentation):
             status.HTTP_400_BAD_REQUEST: self._400_response(
                 "This field may contain only english letters, numbers and special characters (.-'!()/ )",
                 "title",
+            ),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "Company with provided title already exists",
+                {
+                    "detail": error_wrapper(
+                        "Company with this title already exists", "title"
+                    )
+                },
             ),
             status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
                 ["path", "company_id"],

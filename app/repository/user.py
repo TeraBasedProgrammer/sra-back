@@ -13,8 +13,6 @@ from app.utilities.formatters.get_args import get_args
 
 
 class UserRepository(BaseRepository):
-    """Data Access Layer for operating user info"""
-
     model = User
 
     async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:

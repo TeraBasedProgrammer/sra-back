@@ -90,3 +90,14 @@ class QuizFullSchema(QuizBase):
     company_id: int
     questions: list[QuestionSchema]
     tags: list[TagBaseSchema]
+
+    class Config:
+        from_attributes: True
+
+
+class QuizEmployeeSchema(QuizBase):
+    company_id: int
+    tags: list[TagBaseSchema]
+
+    class Config:
+        from_attributes: True

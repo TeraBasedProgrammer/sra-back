@@ -1,39 +1,29 @@
-from typing import Any
+from typing import Optional
 
-from app.models.db.companies import Company
+from pydantic import EmailStr
+
+from app.models.db.companies import Company, RoleEnum
 from app.models.db.users import User
 from app.models.schemas.companies import CompanySchema, UserCompanyM2m
 from app.models.schemas.users import TagBaseSchema, UserSchema
-
-
-def _get_response_example(for_company: bool) -> dict[str, Any]:
-    response = {
-        "example": {
-            "email": "user@example.com",
-            "name": "string",
-            "phone_number": "+380500505050",
-            "id": 0,
-            "registered_at": "timestamp",
-            "average_score": 0,
-            "tags": [{"id": 0, "title": "string"}],
-            "users": [{"id": 0, "name": "string", "role": "owner"}],
-            "companies": [{"id": 0, "title": "string", "role": "owner"}],
-        }
-    }
-
-    if for_company:
-        response["example"].pop("companies")
-    else:
-        response["example"].pop("users")
-
-    return response
 
 
 class UserFullSchema(UserSchema):
     companies: list[UserCompanyM2m]
 
     class Config:
-        json_schema_extra = _get_response_example(for_company=False)
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "name": "string",
+                "phone_number": "+380500505050",
+                "id": 0,
+                "registered_at": "timestamp",
+                "average_score": 0,
+                "tags": [{"id": 0, "title": "string"}],
+                "companies": [{"id": 0, "title": "string", "role": "owner"}],
+            }
+        }
 
     @classmethod
     def from_model(cls, user_model: User):
@@ -60,24 +50,45 @@ class UserFullSchema(UserSchema):
 
 
 class CompanyFullSchema(CompanySchema):
+    owner_email: EmailStr
+    onwer_phone: Optional[str]
+    onwer_name: Optional[str]
     users: list[UserCompanyM2m]
 
     @classmethod
-    def from_model(cls, company_model: Company):
+    def from_model(cls, company_instance: Company):
+        owner = list(
+            filter(lambda u: u.role == RoleEnum.Owner, company_instance.users)
+        )[0].users
+
         return cls(
-            id=company_model.id,
-            title=company_model.title,
-            description=company_model.description,
-            created_at=company_model.created_at,
+            id=company_instance.id,
+            title=company_instance.title,
+            description=company_instance.description,
+            created_at=company_instance.created_at,
+            owner_email=owner.email,
+            onwer_phone=owner.phone_number,
+            onwer_name=owner.name,
             users=[
                 UserCompanyM2m(
                     id=user.users.id,
                     name=user.users.name,
                     role=user.role,
                 )
-                for user in company_model.users
+                for user in company_instance.users
             ],
         )
 
     class Config:
-        json_schema_extra = _get_response_example(for_company=True)
+        json_schema_extra = {
+            "example": {
+                "title": "string",
+                "description": "string",
+                "owner_email": "user@example.com",
+                "onwer_phone": "string",
+                "onwer_name": "string",
+                "id": 0,
+                "created_at": "2023-11-16T13:21:00.469Z",
+                "users": [{"id": 0, "name": "string", "role": "owner"}],
+            }
+        }

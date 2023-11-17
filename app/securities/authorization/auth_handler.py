@@ -27,8 +27,6 @@ class AuthHandler:
         # Initialize user_crud object to get user id once and put it in jwt payload
 
         payload = {
-            # "exp": datetime.utcnow() + timedelta(days=0, hours=2),
-            # TODO: change when access token is implemented
             "exp": datetime.utcnow() + timedelta(days=30),
             "iat": datetime.utcnow(),
             "sub": user_email,

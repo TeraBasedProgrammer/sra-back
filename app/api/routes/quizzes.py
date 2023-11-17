@@ -8,6 +8,7 @@ from app.models.schemas.quizzes import (
     QuizCreateOutput,
     QuizEmployeeSchema,
     QuizFullSchema,
+    QuizUpdate,
 )
 from app.services.quiz import QuizService
 
@@ -38,3 +39,33 @@ async def create_quiz(
     Allows to create a new Quiz within the company
     """
     return await quiz_service.create_quiz(quiz_data, current_user_id)
+
+
+@router.patch("/{quiz_id}/update/", response_model=QuizFullSchema, responses=None)
+async def update_quiz(
+    quiz_id: int,
+    quiz_data: QuizUpdate,
+    current_user_id: User = Depends(get_current_user_id),
+    quiz_service: QuizService = Depends(get_quiz_service),
+) -> QuizFullSchema:
+    """
+    Allows to update a specific Quiz instance
+    """
+    return await quiz_service.update_quiz(quiz_id, quiz_data, current_user_id)
+
+
+@router.delete(
+    "/{quiz_id}/delete/",
+    response_model=None,
+    status_code=204,
+    responses=None,
+)
+async def delete_quiz(
+    quiz_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    quiz_service: QuizService = Depends(get_quiz_service),
+):
+    """
+    ### Allows to delete a specific Quiz instance
+    """
+    return await quiz_service.delete_quiz(quiz_id, current_user_id)

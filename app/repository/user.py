@@ -96,7 +96,6 @@ class UserRepository(BaseRepository):
         query = select(User).where(User.email == email)
         return await self.exists(query)
 
-    # TODO: test
     async def update_user(self, user_id: int, user_data: UserUpdate) -> User:
         logger.debug(f"Received data:\n{get_args()}")
         updated_user = await self.update(user_id, user_data)
@@ -104,7 +103,6 @@ class UserRepository(BaseRepository):
         logger.debug(f'Successfully updated user instance "{user_id}"')
         return updated_user
 
-    # TODO: test
     async def delete_user(self, user_id: int) -> Optional[int]:
         logger.debug(f"Received data:\n{get_args()}")
         result = await self.delete(user_id)

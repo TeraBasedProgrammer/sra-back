@@ -19,7 +19,7 @@ class QuizRepository(BaseRepository):
         logger.debug("Successfully inserted new quiz instance into the database")
         return new_quiz
 
-    async def get_quiz_by_id(self, quiz_id: int) -> Quiz:
+    async def get_full_quiz(self, quiz_id: int) -> Quiz:
         logger.debug(f"Received data:\n{get_args()}")
 
         query = (
@@ -27,9 +27,31 @@ class QuizRepository(BaseRepository):
             .options(joinedload(Quiz.questions), joinedload(Quiz.tags))
             .where(Quiz.id == quiz_id)
         )
+
         result: Quiz = await self.get_instance(query)
         if result:
             logger.debug(f'Retrieved quiz by id "{quiz_id}": "{result}"')
+        return result
+
+    async def get_quiz_data(self, quiz_id: int) -> Quiz:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = select(Quiz).where(Quiz.id == quiz_id)
+
+        result: Quiz = await self.get_instance(query)
+        if result:
+            logger.debug(f'Retrieved quiz data by id "{quiz_id}": "{result}"')
+        return result
+
+    async def get_quiz_company_id(self, quiz_id: int) -> int:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = (select(Quiz).where(Quiz.id == quiz_id)).with_only_columns(
+            Quiz.company_id
+        )
+
+        result: int = await self.async_session.execute(query)
+        logger.debug(f'Retrieved quiz "{quiz_id}" company_id: "{result}"')
         return result
 
     async def update_quiz(self, quiz_id: int, quiz_data: QuizUpdate) -> Quiz:

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from annotated_types import Gt
 from pydantic import BaseModel, field_validator
@@ -83,7 +83,13 @@ class QuizCreateOutput(BaseModel):
 
 
 class QuizUpdate(QuizBase):
-    pass
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completion_time: Optional[Annotated[int, Gt(0)]] = None
+    start_date: Optional[str] = None
+    start_time: Optional[str] = None
+    end_date: Optional[str] = None
+    end_time: Optional[str] = None
 
 
 class QuizFullSchema(QuizBase):

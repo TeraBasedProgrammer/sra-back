@@ -245,7 +245,7 @@ class CompanyService(BaseService):
             self.user_repository, self.company_repository, member_id, company_id
         )
 
-        # Validate if user tries to update its data
+        # Validate if user tries to delete itself
         self._validate_not_same_id(
             current_user_id, member_id, "You can't delete yourself from the company"
         )

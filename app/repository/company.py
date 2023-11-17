@@ -76,7 +76,7 @@ class CompanyRepository(BaseRepository):
         self, company_id: int, company_data: CompanyUpdate
     ) -> Company:
         logger.debug(f"Received data:\n{get_args()}")
-        updated_tag = await self.update(company_id, company_data)
+        updated_company = await self.update(company_id, company_data)
 
         logger.debug(f'Successfully updatetd company instance "{company_id}"')
-        return updated_tag
+        return updated_company

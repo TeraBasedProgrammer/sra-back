@@ -51,8 +51,8 @@ class UserFullSchema(UserSchema):
 
 class CompanyFullSchema(CompanySchema):
     owner_email: EmailStr
-    onwer_phone: Optional[str]
-    onwer_name: Optional[str]
+    owner_phone: Optional[str]
+    owner_name: Optional[str]
     users: list[UserCompanyM2m]
 
     @classmethod
@@ -67,8 +67,8 @@ class CompanyFullSchema(CompanySchema):
             description=company_instance.description,
             created_at=company_instance.created_at,
             owner_email=owner.email,
-            onwer_phone=owner.phone_number,
-            onwer_name=owner.name,
+            owner_phone=owner.phone_number,
+            owner_name=owner.name,
             users=[
                 UserCompanyM2m(
                     id=user.users.id,
@@ -85,8 +85,8 @@ class CompanyFullSchema(CompanySchema):
                 "title": "string",
                 "description": "string",
                 "owner_email": "user@example.com",
-                "onwer_phone": "string",
-                "onwer_name": "string",
+                "owner_phone": "string",
+                "owner_name": "string",
                 "id": 0,
                 "created_at": "2023-11-16T13:21:00.469Z",
                 "users": [{"id": 0, "name": "string", "role": "owner"}],

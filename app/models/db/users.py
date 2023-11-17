@@ -48,6 +48,9 @@ class Tag(Base):
 
     __table_args__ = (UniqueConstraint("title", "company_id", name="_tag_uc"),)
 
+    def __repr__(self):
+        return f"Tag {self.title}"
+
 
 class TagUser(Base):
     __tablename__ = "tag_user"
@@ -58,6 +61,9 @@ class TagUser(Base):
     users = relationship("User", back_populates="tags", lazy="joined")
     tags = relationship("Tag", back_populates="users", lazy="joined")
 
+    def __repr__(self):
+        return f"TagUser object for tag {self.tag_id} and user {self.user_id}"
+
 
 class TagQuiz(Base):
     __tablename__ = "tag_quiz"
@@ -67,3 +73,6 @@ class TagQuiz(Base):
 
     quizzes = relationship("Quiz", back_populates="tags", lazy="select")
     tags = relationship("Tag", back_populates="quizzes", lazy="select")
+
+    def __repr__(self):
+        return f"TagUser object for tag {self.tag_id} and quiz {self.quiz_id}"

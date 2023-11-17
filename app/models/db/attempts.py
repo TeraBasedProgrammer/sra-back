@@ -18,3 +18,6 @@ class Attempt(Base):
     end_time = Column(DateTime)
     spent_time = Column(String)
     result = Column(Integer, default=0)
+
+    def __repr__(self) -> str:
+        return f"Attempt for quiz {self.quiz_id}"

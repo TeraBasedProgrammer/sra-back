@@ -8,8 +8,8 @@ services:
       sh -c "alembic upgrade head &&
             gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --reload --bind=0.0.0.0:8000"
     volumes:
-      - app_data:/home/ubuntu/code/app:/code/app
-      - migrations_data:/home/ubuntu/code/migrations:/code/migrations
+      - /home/ubuntu/code/app:/code/app
+      - /home/ubuntu/code/migrations:/code/migrations
     ports:
       - 8000:8000
     env_file:
@@ -64,7 +64,5 @@ networks:
     driver: bridge
   
 volumes:
-  app_data:
-  migrations_data:
   postgres_data:
   redis_data:

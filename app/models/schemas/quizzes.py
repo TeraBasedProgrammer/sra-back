@@ -76,6 +76,7 @@ class QuizBase(BaseModel):
 
 class QuizCreateInput(QuizBase):
     company_id: int
+    tags: list[int]
 
 
 class QuizCreateOutput(BaseModel):
@@ -90,6 +91,14 @@ class QuizUpdate(QuizBase):
     start_time: Optional[str] = None
     end_date: Optional[str] = None
     end_time: Optional[str] = None
+    tags: Optional[list[int]] = None
+
+    def are_all_attributes_none(self) -> bool:
+        # Iterate over all attributes and check if they are None
+        for attr, value in self.__dict__.items():
+            if value is not None:
+                return False
+        return True
 
 
 class QuizFullSchema(QuizBase):
@@ -107,3 +116,13 @@ class QuizEmployeeSchema(QuizBase):
 
     class Config:
         from_attributes: True
+
+
+class QuizListSchema(BaseModel):
+    id: int
+    title: str
+    start_time: str
+    start_date: str
+    end_time: str
+    end_date: str
+    tags: list[TagBaseSchema]

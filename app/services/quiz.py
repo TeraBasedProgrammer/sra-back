@@ -5,23 +5,27 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.db.companies import RoleEnum
 from app.models.db.quizzes import Quiz
+from app.models.db.users import TagQuiz
 from app.models.schemas.quizzes import (
     QuizCreateInput,
     QuizCreateOutput,
     QuizEmployeeSchema,
     QuizFullSchema,
+    QuizListSchema,
     QuizUpdate,
 )
 from app.repository.company import CompanyMember, CompanyRepository
 from app.repository.quiz import QuizRepository
+from app.repository.tag import TagRepository
 from app.services.base import BaseService
 from app.utilities.formatters.http_error import error_wrapper
 
 
 class QuizService(BaseService):
-    def __init__(self, quiz_repository, company_repository) -> None:
+    def __init__(self, quiz_repository, company_repository, tag_repository) -> None:
         self.quiz_repository: QuizRepository = quiz_repository
         self.company_repository: CompanyRepository = company_repository
+        self.tag_repository: TagRepository = tag_repository
 
     def _validate_quiz_deadlines(
         self, quiz_data: QuizCreateInput | QuizUpdate
@@ -135,8 +139,20 @@ class QuizService(BaseService):
 
         self._validate_quiz_deadlines(quiz_data)
 
+        await self._validate_tag_ids(self.tag_repository, quiz_data)
+
         try:
+            quiz_tags = quiz_data.tags
+            quiz_data.tags = []
             quiz: Quiz = await self.quiz_repository.create_quiz(quiz_data)
+            new_quiz_tags: list[TagQuiz] = [
+                TagQuiz(tag_id=tag_id, quiz_id=quiz.id) for tag_id in quiz_tags
+            ]
+
+            # Save new M2M objects explicitly
+            for tag_quiz in new_quiz_tags:
+                await self.tag_repository.save(tag_quiz)
+
             return QuizCreateOutput(quiz_id=quiz.id)
         except IntegrityError:
             raise HTTPException(
@@ -168,10 +184,26 @@ class QuizService(BaseService):
             if getattr(quiz_data, deadline):
                 self._validate_update_quiz_deadlines(quiz_data, existing_quiz_data)
                 break
+
+        if quiz_data.tags:
+            await self._validate_tag_ids(self.tag_repository, quiz_data)
+
+            # Recreate tags for the quiz
+            await self.quiz_repository.delete_related_tag_quiz(quiz_id)
+            await self.quiz_repository.save_many(
+                [TagQuiz(tag_id=tag_id, quiz_id=quiz_id) for tag_id in quiz_data.tags]
+            )
+            quiz_data.tags = None
+
         try:
-            await self.quiz_repository.update_quiz(quiz_id, quiz_data)
+            # Validate if 'tags' field was the only field
+            # (if so all fields will be None in quiz_data and an SQL exception will occur)
+            if not quiz_data.are_all_attributes_none():
+                await self.quiz_repository.update_quiz(quiz_id, quiz_data)
             updated_quiz: Quiz = await self.quiz_repository.get_full_quiz(quiz_id)
-            return updated_quiz
+            updated_quiz.tags = [tag.tags for tag in updated_quiz.tags]
+
+            return QuizFullSchema.model_validate(updated_quiz, from_attributes=True)
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,

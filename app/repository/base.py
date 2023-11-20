@@ -36,7 +36,7 @@ class BaseRepository:
         query = select(self.model).where(self.model.id == instance_id)
         return await self.exists(query)
 
-    async def get_all(self, query: Select) -> list[Any]:
+    async def get_many(self, query: Select) -> list[Any]:
         response = await self.async_session.execute(query)
         result = response.unique().all()
         return result

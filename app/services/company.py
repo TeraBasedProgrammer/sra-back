@@ -3,7 +3,6 @@ from typing import Any, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
-from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser, RoleEnum
 from app.models.db.users import TagUser, User
 from app.models.schemas.auth import UserSignUpOutput
@@ -34,16 +33,6 @@ class CompanyService(BaseService):
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail=error_wrapper("Invalid role", "role"),
-            )
-
-    async def _validate_tag_ids(self, member_data: Any) -> None:
-        if not await self.tag_repository.tags_exist_by_id(member_data.tags):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                detail=error_wrapper(
-                    "One or more tags are not found. Ensure you passed the correct values",
-                    "tags",
-                ),
             )
 
     def _validate_not_same_id(
@@ -144,7 +133,7 @@ class CompanyService(BaseService):
         )
 
         await self._validate_passed_role(member_data)
-        await self._validate_tag_ids(member_data)
+        await self._validate_tag_ids(self.tag_repository, member_data)
 
         # Hash user password
         member_data.password = auth_handler.get_password_hash(member_data.password)
@@ -214,11 +203,10 @@ class CompanyService(BaseService):
                 raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
         if member_data.tags:
-            await self._validate_tag_ids(member_data)
+            await self._validate_tag_ids(self.tag_repository, member_data)
 
             # Recreate tags for the member
             await self.user_repository.delete_related_tag_user(member_id)
-            logger.critical(type(member.tags))
             await self.user_repository.save_many(
                 [TagUser(user_id=member_id, tag_id=tag) for tag in member_data.tags]
             )

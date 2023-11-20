@@ -14,6 +14,9 @@ class TagBaseSchema(BaseModel):
     def validate_tag_title(cls, value):
         return validate_text(value, "title", min_length=4, max_length=30)
 
+    class Config:
+        from_attributes = True
+
 
 class TagSchema(TagBaseSchema):
     description: str
@@ -22,6 +25,9 @@ class TagSchema(TagBaseSchema):
     @classmethod
     def validate_tag_description(cls, value):
         return validate_text(value, "description", min_length=10, max_length=3000)
+
+    class Config:
+        from_attributes = True
 
 
 # TODO: find out how to simplify

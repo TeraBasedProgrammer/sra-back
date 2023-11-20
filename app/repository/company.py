@@ -66,7 +66,7 @@ class CompanyRepository(BaseRepository):
             .where(CompanyUser.company_id == company_id)
             .with_only_columns(CompanyUser.user_id, CompanyUser.role)
         )
-        result: list[Company] = await self.get_all(query)
+        result: list[Company] = await self.get_many(query)
         if result:
             logger.debug(f'Retrieved company "{company_id}" members: "{result}"')
 

@@ -2,7 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import load_only
 
 from app.config.logs.logger import logger
-from app.models.db.users import Tag
+from app.models.db.users import Tag, TagUser
 from app.models.schemas.tags import TagCreateInput, TagUpdateInput
 from app.repository.base import BaseRepository
 from app.utilities.formatters.get_args import get_args
@@ -19,13 +19,22 @@ class TagRepository(BaseRepository):
         logger.debug("Successfully inserted new tag instance into the database")
         return new_tag.id
 
-    async def get_company_tags(self, company_id) -> list[Tag]:
-        result = await self.async_session.execute(
+    async def get_company_tags(self, company_id: int) -> list[Tag]:
+        query = (
             select(Tag)
             .options(load_only(Tag.id, Tag.title))
             .where(Tag.company_id == company_id)
         )
-        return result.scalars().all()
+        return self.get_many(query)
+
+    async def get_user_tags(self, user_id: int) -> list[Tag]:
+        query = (
+            select(Tag)
+            .options(load_only(Tag.id, Tag.title))
+            .join(TagUser, TagUser.tag_id == Tag.id)
+            .where(TagUser.user_id == user_id)
+        )
+        return await self.get_many(query)
 
     async def get_tag_by_id(self, tag_id) -> Tag:
         logger.debug(f"Received data:\n{get_args()}")

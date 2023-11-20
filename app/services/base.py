@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel
@@ -7,6 +7,7 @@ from app.config.logs.logger import logger
 from app.models.db.companies import RoleEnum
 from app.repository.base import BaseRepository
 from app.repository.company import CompanyMember, CompanyRepository
+from app.repository.tag import TagRepository
 from app.repository.user import UserRepository
 from app.utilities.formatters.http_error import error_wrapper
 from app.utilities.validators.permission.user import validate_user_company_role
@@ -67,3 +68,13 @@ class BaseService:
 
         if not user_is_member:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Member is not found")
+
+    async def _validate_tag_ids(self, tag_repository: TagRepository, data: Any) -> None:
+        if not await tag_repository.tags_exist_by_id(data.tags):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                detail=error_wrapper(
+                    "One or more tags are not found. Ensure you passed the correct values",
+                    "tags",
+                ),
+            )

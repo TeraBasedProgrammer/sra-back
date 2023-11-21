@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.db.companies import RoleEnum
 from app.models.db.quizzes import Quiz
-from app.models.db.users import TagQuiz
+from app.models.db.users import Tag, TagQuiz
 from app.models.schemas.quizzes import (
     QuizCreateInput,
     QuizCreateOutput,
@@ -124,6 +124,45 @@ class QuizService(BaseService):
 
         return QuizFullSchema.model_validate(quiz, from_attributes=True)
 
+    async def get_all_company_quizzes(
+        self, company_id: int, current_user_id: int
+    ) -> list[QuizListSchema]:
+        await self._validate_instance_exists(self.company_repository, company_id)
+        await self._validate_user_permissions(
+            self.company_repository,
+            company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Tester),
+        )
+
+        company_quizzes: list[
+            Quiz
+        ] = await self.quiz_repository.get_all_company_quizzes(company_id)
+        return [
+            QuizListSchema.model_validate(quiz, from_attributes=True)
+            for quiz in company_quizzes
+        ]
+
+    async def get_member_quizzes(
+        self, company_id: int, current_user_id: int
+    ) -> list[QuizListSchema]:
+        await self._validate_instance_exists(self.company_repository, company_id)
+        await self._validate_user_permissions(
+            self.company_repository,
+            company_id,
+            current_user_id,
+        )
+
+        user_tags: list[Tag] = await self.tag_repository.get_user_tags(current_user_id)
+
+        user_quizzes: list[Quiz] = await self.quiz_repository.get_member_quizzes(
+            company_id, user_tags
+        )
+        return [
+            QuizListSchema.model_validate(quiz, from_attributes=True)
+            for quiz in user_quizzes
+        ]
+
     async def create_quiz(
         self, quiz_data: QuizCreateInput, current_user_id: int
     ) -> QuizCreateOutput:
@@ -201,7 +240,6 @@ class QuizService(BaseService):
             if not quiz_data.are_all_attributes_none():
                 await self.quiz_repository.update_quiz(quiz_id, quiz_data)
             updated_quiz: Quiz = await self.quiz_repository.get_full_quiz(quiz_id)
-            updated_quiz.tags = [tag.tags for tag in updated_quiz.tags]
 
             return QuizFullSchema.model_validate(updated_quiz, from_attributes=True)
         except IntegrityError:

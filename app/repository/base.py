@@ -1,4 +1,5 @@
-from typing import Any, Type
+from itertools import chain
+from typing import Any, Iterable, Type
 
 from pydantic import BaseModel
 from sqlalchemy import delete, select, update
@@ -15,6 +16,9 @@ class BaseRepository:
 
     def __init__(self, async_session: AsyncSession):
         self.async_session = async_session
+
+    def unpack(collection: Iterable) -> list:
+        return list(chain.from_iterable(collection))
 
     async def create(self, model_data: Type[BaseModel]) -> Type[Base]:
         new_instance = self.model(**model_data.model_dump())

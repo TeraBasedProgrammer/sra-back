@@ -34,7 +34,7 @@ class TagRepository(BaseRepository):
             .join(TagUser, TagUser.tag_id == Tag.id)
             .where(TagUser.user_id == user_id)
         )
-        return await self.get_many(query)
+        return self.unpack(await self.get_many(query))
 
     async def get_tag_by_id(self, tag_id) -> Tag:
         logger.debug(f"Received data:\n{get_args()}")

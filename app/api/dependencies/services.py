@@ -38,6 +38,7 @@ def get_tag_service(
 def get_quiz_service(
     quiz_repository: QuizRepository = Depends(get_repository(QuizRepository)),
     company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
+    tag_repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> QuizService:
-    service = QuizService(quiz_repository, company_repository)
+    service = QuizService(quiz_repository, company_repository, tag_repository)
     return service

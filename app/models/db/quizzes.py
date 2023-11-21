@@ -41,7 +41,7 @@ class Quiz(Base):
 
     questions = relationship("Question", back_populates="quiz", lazy="joined")
     attempts = relationship("Attempt", back_populates="quiz", lazy="select")
-    tags = relationship("TagQuiz", back_populates="quizzes", lazy="select")
+    tags = relationship("TagQuiz", back_populates="quizzes", lazy="joined")
 
     @property
     def questions_count(self) -> int:

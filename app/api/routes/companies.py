@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import auth_wrapper
-from app.api.dependencies.services import get_company_service, get_tag_service
+from app.api.dependencies.services import (
+    get_company_service,
+    get_quiz_service,
+    get_tag_service,
+)
 from app.api.dependencies.user import get_current_user, get_current_user_id
 from app.api.docs.companies import company_docs
 from app.models.db.users import User
@@ -12,9 +16,11 @@ from app.models.schemas.companies import (
     CompanyUpdate,
 )
 from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
+from app.models.schemas.quizzes import QuizListSchema
 from app.models.schemas.tags import TagBaseSchema
 from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate
 from app.services.company import CompanyService
+from app.services.quiz import QuizService
 from app.services.tag import TagService
 
 router = APIRouter(
@@ -72,6 +78,30 @@ async def get_company_member(
     ### Allows company administration to retrieve a specific member
     """
     return await company_service.get_member(company_id, member_id, current_user_id)
+
+
+@router.get("/{company_id}/quizzes/", response_model=list[QuizListSchema])
+async def get_company_quizzes(
+    company_id: int,
+    current_user_id: User = Depends(get_current_user_id),
+    quiz_service: QuizService = Depends(get_quiz_service),
+) -> list[QuizListSchema]:
+    """
+    ### Returns a list with all the available quizzes within the company
+    """
+    return await quiz_service.get_all_company_quizzes(company_id, current_user_id)
+
+
+@router.get("/{company_id}/quizzes/for-me/", response_model=list[QuizListSchema])
+async def get_member_quizzes(
+    company_id: int,
+    current_user_id: User = Depends(get_current_user_id),
+    quiz_service: QuizService = Depends(get_quiz_service),
+) -> list[QuizListSchema]:
+    """
+    ### Returns a list with all the available quizzes for the specific company member
+    """
+    return await quiz_service.get_member_quizzes(company_id, current_user_id)
 
 
 @router.post("/create/", status_code=201, responses=company_docs.create_company())

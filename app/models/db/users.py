@@ -71,8 +71,8 @@ class TagQuiz(Base):
     tag_id = Column(ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
     quiz_id = Column(ForeignKey("quizzes.id", ondelete="CASCADE"), primary_key=True)
 
-    quizzes = relationship("Quiz", back_populates="tags", lazy="select")
-    tags = relationship("Tag", back_populates="quizzes", lazy="select")
+    quizzes = relationship("Quiz", back_populates="tags", lazy="joined")
+    tags = relationship("Tag", back_populates="quizzes", lazy="joined")
 
     def __repr__(self):
-        return f"TagUser object for tag {self.tag_id} and quiz {self.quiz_id}"
+        return f"TagQuiz object for tag {self.tag_id} and quiz {self.quiz_id}"

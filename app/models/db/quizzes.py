@@ -1,7 +1,6 @@
 import enum
 
 from sqlalchemy import (
-    TIMESTAMP,
     Boolean,
     Column,
     Enum,
@@ -35,18 +34,23 @@ class Quiz(Base):
     completion_time = Column(Integer, nullable=False)
 
     # Deadlines
-    start_time = Column(TIMESTAMP, nullable=True)
-    end_time = Column(TIMESTAMP, nullable=True)
+    start_date = Column(String, nullable=False)
+    end_date = Column(String, nullable=False)
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
 
-    questions = relationship("Question", back_populates="quiz", lazy="select")
+    questions = relationship("Question", back_populates="quiz", lazy="joined")
     attempts = relationship("Attempt", back_populates="quiz", lazy="select")
-    tags = relationship("TagQuiz", back_populates="quizzes", lazy="select")
+    tags = relationship("TagQuiz", back_populates="quizzes", lazy="joined")
 
     @property
     def questions_count(self) -> int:
         return len(self.questions)
 
     __table_args__ = (UniqueConstraint("title", "company_id", name="_quiz_uc"),)
+
+    def __repr__(self) -> str:
+        return f"Quiz {self.title}"
 
 
 class Question(Base):
@@ -59,9 +63,12 @@ class Question(Base):
     type = Column(Enum(QuestionTypeEnum), nullable=False)
 
     quiz = relationship("Quiz", back_populates="questions", lazy="select")
-    answers = relationship("Answer", back_populates="question", lazy="select")
+    answers = relationship("Answer", back_populates="question", lazy="joined")
 
     __table_args__ = (UniqueConstraint("title", "quiz_id", name="_question_uc"),)
+
+    def __repr__(self) -> str:
+        return f"Question {self.title}"
 
 
 class Answer(Base):
@@ -69,10 +76,12 @@ class Answer(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=True)
-    picture_url = Column(String, nullable=True)
     is_correct = Column(Boolean, nullable=False, default=False)
     question_id = Column(ForeignKey("questions.id", ondelete="CASCADE"))
 
     question = relationship("Question", back_populates="answers", lazy="select")
 
     __table_args__ = (UniqueConstraint("title", "question_id", name="_answer_uc"),)
+
+    def __repr__(self) -> str:
+        return f"Answer {self.title}"

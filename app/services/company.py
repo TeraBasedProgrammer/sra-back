@@ -1,9 +1,8 @@
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
-from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser, RoleEnum
 from app.models.db.users import TagUser, User
 from app.models.schemas.auth import UserSignUpOutput
@@ -11,6 +10,7 @@ from app.models.schemas.companies import (
     CompanyCreate,
     CompanyCreateSuccess,
     CompanyUpdate,
+    UserCompanyM2m,
 )
 from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
 from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate, UserCreate
@@ -35,16 +35,6 @@ class CompanyService(BaseService):
                 detail=error_wrapper("Invalid role", "role"),
             )
 
-    async def _validate_tag_ids(self, member_data: Any) -> None:
-        if not await self.tag_repository.tags_exist_by_id(member_data.tags):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                detail=error_wrapper(
-                    "One or more tags are not found. Ensure you passed the correct values",
-                    "tags",
-                ),
-            )
-
     def _validate_not_same_id(
         self, current_user_id: int, member_id: int, error_message: str
     ) -> None:
@@ -65,12 +55,23 @@ class CompanyService(BaseService):
             return CompanyCreateSuccess(id=company_id)
         except IntegrityError:
             raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_409_CONFLICT,
                 detail=error_wrapper("Company with this title already exists", "title"),
             )
 
-    async def get_user_companies(self, current_user: User):
-        return await self.company_repository.get_user_companies(current_user)
+    async def get_user_companies(
+        self, current_user_id: int
+    ) -> Optional[list[UserCompanyM2m]]:
+        companies: list[Company] = await self.company_repository.get_user_companies(
+            current_user_id
+        )
+        if companies:
+            return [
+                UserCompanyM2m(title=company.title, role=company.role, id=company.id)
+                for company in companies
+            ]
+
+        return []
 
     async def get_company_by_id(self, company_id: int) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
@@ -83,24 +84,30 @@ class CompanyService(BaseService):
     ) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
         self._validate_update_data(company_data)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
             (RoleEnum.Owner,),
         )
 
-        await self.company_repository.update_company(company_id, company_data)
-        updated_company: Company = await self.company_repository.get_company_by_id(
-            company_id
-        )
-        return CompanyFullSchema.from_model(updated_company)
+        try:
+            await self.company_repository.update_company(company_id, company_data)
+            updated_company: Company = await self.company_repository.get_company_by_id(
+                company_id
+            )
+            return CompanyFullSchema.from_model(updated_company)
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper("Company with this title already exists", "title"),
+            )
 
     async def get_member(
         self, company_id: int, member_id: int, current_user_id: int
     ) -> UserFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -118,7 +125,7 @@ class CompanyService(BaseService):
         self, company_id: int, member_data: CompanyMemberInput, current_user_id: int
     ) -> UserSignUpOutput:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -126,7 +133,7 @@ class CompanyService(BaseService):
         )
 
         await self._validate_passed_role(member_data)
-        await self._validate_tag_ids(member_data)
+        await self._validate_tag_ids(self.tag_repository, member_data)
 
         # Hash user password
         member_data.password = auth_handler.get_password_hash(member_data.password)
@@ -171,7 +178,7 @@ class CompanyService(BaseService):
         current_user_id: int,
     ) -> UserFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -196,11 +203,10 @@ class CompanyService(BaseService):
                 raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
         if member_data.tags:
-            await self._validate_tag_ids(member_data)
+            await self._validate_tag_ids(self.tag_repository, member_data)
 
             # Recreate tags for the member
             await self.user_repository.delete_related_tag_user(member_id)
-            logger.critical(type(member.tags))
             await self.user_repository.save_many(
                 [TagUser(user_id=member_id, tag_id=tag) for tag in member_data.tags]
             )
@@ -215,7 +221,7 @@ class CompanyService(BaseService):
 
     async def delete_member(self, company_id, member_id, current_user_id) -> None:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             company_id,
             current_user_id,
@@ -227,7 +233,7 @@ class CompanyService(BaseService):
             self.user_repository, self.company_repository, member_id, company_id
         )
 
-        # Validate if user tries to update its data
+        # Validate if user tries to delete itself
         self._validate_not_same_id(
             current_user_id, member_id, "You can't delete yourself from the company"
         )

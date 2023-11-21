@@ -1,6 +1,7 @@
 from fastapi import status
 
 from app.api.docs.base import ResponseDocumentation
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class AuthDocumentation(ResponseDocumentation):
@@ -8,7 +9,11 @@ class AuthDocumentation(ResponseDocumentation):
         responses: dict[int, dict] = {
             status.HTTP_409_CONFLICT: self._409_response(
                 "User email is already registered in the system",
-                {"detail": "User with email 'user@example.com' already exists"},
+                {
+                    "detail": error_wrapper(
+                        "User with this email already exists", "email"
+                    )
+                },
             ),
             status.HTTP_400_BAD_REQUEST: self._400_response(
                 "Password has incorrect format", "password"

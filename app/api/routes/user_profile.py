@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_company_service, get_user_service
-from app.api.dependencies.user import get_current_user
+from app.api.dependencies.user import get_current_user, get_current_user_id
 from app.api.docs.user_profile import user_profile_docs
 from app.models.db.users import User
-from app.models.schemas.companies import CompanyList
+from app.models.schemas.companies import UserCompanyM2m
 from app.models.schemas.company_user import UserFullSchema
 from app.models.schemas.users import (
     PasswordChangeOutput,
@@ -38,18 +38,18 @@ async def get_user_profile(
 
 @router.get(
     "/companies/",
-    response_model=list[CompanyList],
+    response_model=list[UserCompanyM2m],
     response_model_exclude_none=True,
     responses=user_profile_docs.get_user_companies(),
 )
 async def get_user_companies(
-    current_user: User = Depends(get_current_user),
+    current_user_id: int = Depends(get_current_user_id),
     company_service: CompanyService = Depends(get_company_service),
-):
+) -> list[UserCompanyM2m]:
     """
     ### Retrieve all user companies
     """
-    return await company_service.get_user_companies(current_user)
+    return await company_service.get_user_companies(current_user_id)
 
 
 @router.patch(

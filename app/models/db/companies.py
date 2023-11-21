@@ -20,7 +20,7 @@ class Company(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False, unique=True)
-    description = Column(String, nullable=False)
+    description = Column(String, nullable=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow())
 
     users = relationship("CompanyUser", back_populates="companies", lazy="select")
@@ -40,3 +40,8 @@ class CompanyUser(Base):
 
     users = relationship("User", back_populates="companies", lazy="joined")
     companies = relationship("Company", back_populates="users", lazy="joined")
+
+    def __repr__(self) -> str:
+        return (
+            f"CompanyUser object for company {self.company_id} and user {self.user_id}"
+        )

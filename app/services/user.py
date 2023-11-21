@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import HTTPException, status
 from pydantic import EmailStr
+from sqlalchemy.exc import IntegrityError
 
 from app.config.logs.logger import logger
 from app.config.settings.base import settings
@@ -34,21 +35,18 @@ class UserService(BaseService):
     async def register_user(self, user_data: UserSignUpInput) -> UserSignUpOutput:
         logger.info("Creating new User instance")
 
-        user_existing_object = await self.user_repository.exists_by_email(
-            user_data.email
-        )
-        if user_existing_object:
-            logger.warning(f'User with email "{user_data.email}" already exists')
-            raise HTTPException(
-                status.HTTP_409_CONFLICT,
-                detail="User with this email already exists",
-            )
-
         # Hashing input password
         user_data.password = auth_handler.get_password_hash(user_data.password)
-        result = await self.user_repository.create_user(
-            UserCreate(**user_data.model_dump())
-        )
+
+        try:
+            result = await self.user_repository.create_user(
+                UserCreate(**user_data.model_dump())
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper("User with this email already exists", "email"),
+            )
 
         logger.info("New user instance has been successfully created")
         return result

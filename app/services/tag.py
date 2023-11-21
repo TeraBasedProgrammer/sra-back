@@ -13,6 +13,7 @@ from app.models.schemas.tags import (
 from app.repository.company import CompanyRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class TagService(BaseService):
@@ -26,7 +27,7 @@ class TagService(BaseService):
         await self._validate_instance_exists(
             self.company_repository, tag_data.company_id
         )
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag_data.company_id,
             current_user_id,
@@ -39,14 +40,16 @@ class TagService(BaseService):
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                detail="The company already has a tag with provided title, try again",
+                detail=error_wrapper(
+                    "The company already has a tag with provided title", "title"
+                ),
             )
 
     async def get_company_tags(
         self, current_user_id: int, company_id: int
     ) -> list[TagBaseSchema]:
         await self._validate_instance_exists(self.company_repository, company_id)
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository, company_id, current_user_id
         )
 
@@ -54,12 +57,11 @@ class TagService(BaseService):
         return [TagBaseSchema(id=tag.id, title=tag.title) for tag in tags]
 
     async def get_tag_by_id(self, current_user_id: int, tag_id: int) -> TagSchema:
-        if not await self.tag_repository.exists_by_id(tag_id):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Tag is not found")
+        await self._validate_instance_exists(self.tag_repository, tag_id)
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository, tag.company_id, current_user_id
         )
 
@@ -77,26 +79,34 @@ class TagService(BaseService):
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag.company_id,
             current_user_id,
             (RoleEnum.Owner, RoleEnum.Admin),
         )
 
-        updated_tag: Tag = await self.tag_repository.update_tag(tag_id, tag_data)
-        return TagSchema(
-            id=updated_tag.id,
-            title=updated_tag.title,
-            description=updated_tag.description,
-        )
+        try:
+            updated_tag: Tag = await self.tag_repository.update_tag(tag_id, tag_data)
+            return TagSchema(
+                id=updated_tag.id,
+                title=updated_tag.title,
+                description=updated_tag.description,
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper(
+                    "The company already has a tag with provided title", "title"
+                ),
+            )
 
     async def delete_tag(self, tag_id: int, current_user_id: int) -> None:
         await self._validate_instance_exists(self.tag_repository, tag_id)
 
         tag = await self.tag_repository.get_tag_by_id(tag_id)
 
-        await self._validate_user_membership(
+        await self._validate_user_permissions(
             self.company_repository,
             tag.company_id,
             current_user_id,

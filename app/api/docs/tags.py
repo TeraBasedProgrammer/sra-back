@@ -1,6 +1,7 @@
 from fastapi import status
 
 from app.api.docs.base import ResponseDocumentation
+from app.utilities.formatters.http_error import error_wrapper
 
 
 class TagDocumentantion(ResponseDocumentation):
@@ -31,9 +32,11 @@ class TagDocumentantion(ResponseDocumentation):
                 "Input should be a valid string",
             ),
             status.HTTP_409_CONFLICT: self._409_response(
-                "Tag with the provided title already exists within provided company",
+                "Tag with the provided title already exists within the company",
                 {
-                    "detail": "The company already has a tag with provided title, try again"
+                    "detail": error_wrapper(
+                        "The company already has a tag with provided title", "title"
+                    )
                 },
             ),
         }
@@ -49,6 +52,14 @@ class TagDocumentantion(ResponseDocumentation):
             ),
             status.HTTP_400_BAD_REQUEST: self._400_response(
                 "At least one valid field should be provided", None
+            ),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "Tag with the provided title already exists within the company",
+                {
+                    "detail": error_wrapper(
+                        "The company already has a tag with provided title", "title"
+                    )
+                },
             ),
         }
 

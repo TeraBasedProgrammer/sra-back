@@ -8,6 +8,7 @@ from app.api.dependencies.services import (
 )
 from app.api.dependencies.user import get_current_user, get_current_user_id
 from app.api.docs.companies import company_docs
+from app.api.docs.quizzes import quiz_docs
 from app.models.db.users import User
 from app.models.schemas.auth import UserSignUpOutput
 from app.models.schemas.companies import (
@@ -80,7 +81,11 @@ async def get_company_member(
     return await company_service.get_member(company_id, member_id, current_user_id)
 
 
-@router.get("/{company_id}/quizzes/", response_model=list[QuizListSchema])
+@router.get(
+    "/{company_id}/quizzes/",
+    response_model=list[QuizListSchema],
+    responses=quiz_docs.get_company_quizzes(),
+)
 async def get_company_quizzes(
     company_id: int,
     current_user_id: User = Depends(get_current_user_id),
@@ -92,7 +97,11 @@ async def get_company_quizzes(
     return await quiz_service.get_all_company_quizzes(company_id, current_user_id)
 
 
-@router.get("/{company_id}/quizzes/for-me/", response_model=list[QuizListSchema])
+@router.get(
+    "/{company_id}/quizzes/for-me/",
+    response_model=list[QuizListSchema],
+    responses=quiz_docs.get_member_quizzes(),
+)
 async def get_member_quizzes(
     company_id: int,
     current_user_id: User = Depends(get_current_user_id),

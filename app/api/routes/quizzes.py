@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.services import get_quiz_service
 from app.api.dependencies.user import get_current_user_id
+from app.api.docs.quizzes import quiz_docs
 from app.models.db.users import User
 from app.models.schemas.quizzes import (
     QuizCreateInput,
@@ -16,7 +17,9 @@ router = APIRouter(prefix="/quizzes", tags=["Quizzes"])
 
 
 @router.get(
-    "/{quiz_id}/", response_model=QuizFullSchema | QuizEmployeeSchema, responses=None
+    "/{quiz_id}/",
+    response_model=QuizFullSchema | QuizEmployeeSchema,
+    responses=quiz_docs.get_quiz(),
 )
 async def get_quiz(
     quiz_id: int,
@@ -29,7 +32,9 @@ async def get_quiz(
     return await quiz_service.get_quiz(quiz_id, current_user_id)
 
 
-@router.post("/create/", response_model=QuizCreateOutput, responses=None)
+@router.post(
+    "/create/", response_model=QuizCreateOutput, responses=quiz_docs.create_quiz()
+)
 async def create_quiz(
     quiz_data: QuizCreateInput,
     current_user_id: User = Depends(get_current_user_id),
@@ -41,7 +46,11 @@ async def create_quiz(
     return await quiz_service.create_quiz(quiz_data, current_user_id)
 
 
-@router.patch("/{quiz_id}/update/", response_model=QuizFullSchema, responses=None)
+@router.patch(
+    "/{quiz_id}/update/",
+    response_model=QuizFullSchema,
+    responses=quiz_docs.update_quiz(),
+)
 async def update_quiz(
     quiz_id: int,
     quiz_data: QuizUpdate,
@@ -58,7 +67,7 @@ async def update_quiz(
     "/{quiz_id}/delete/",
     response_model=None,
     status_code=204,
-    responses=None,
+    responses=quiz_docs.delete_quiz(),
 )
 async def delete_quiz(
     quiz_id: int,

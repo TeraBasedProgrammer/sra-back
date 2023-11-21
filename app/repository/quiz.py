@@ -66,7 +66,6 @@ class QuizRepository(BaseRepository):
                 quiz.tags = [tag.tags for tag in quiz.tags]
         return result
 
-    # TODO: implement
     async def get_member_quizzes(
         self, company_id: int, user_tags: list[Tag]
     ) -> list[Quiz]:

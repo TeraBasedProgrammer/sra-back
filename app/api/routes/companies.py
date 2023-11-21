@@ -37,6 +37,7 @@ router = APIRouter(
     responses=company_docs.get_company(),
 )
 async def get_company(
+    filter: str,
     company_id: int,
     company_service: CompanyService = Depends(get_company_service),
     auth=Depends(auth_wrapper),
@@ -44,7 +45,7 @@ async def get_company(
     """
     ### Return a company data by id
     """
-    return await company_service.get_company_by_id(company_id)
+    return await company_service.get_company_by_id(company_id, filter)
 
 
 @router.get(

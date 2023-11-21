@@ -47,20 +47,31 @@ class CompanyRepository(BaseRepository):
         result: list[Company] = response.unique()
         return result
 
-    async def get_company_by_id(self, company_id: int) -> Company:
+    async def get_company_by_id(self, company_id: int, filter_string: str) -> Company:
         logger.debug(f"Received data:\n{get_args()}")
+
+        company_user_filter = (
+            (User.name.icontains(filter_string))
+            | (User.phone_number.icontains(filter_string))
+            | (User.email.icontains(filter_string))
+        )
 
         query = (
             select(Company)
-            .join(Company.users)
-            .join(CompanyUser.users)
+            .outerjoin(Company.users)
+            .outerjoin(CompanyUser.users)
             .options(contains_eager(Company.users).contains_eager(CompanyUser.users))
-            .where(Company.id == company_id)
+            .where((Company.id == company_id) & company_user_filter)
         )
         result: Company = await self.get_instance(query)
 
         if result:
             logger.debug(f'Retrieved company by id "{company_id}": "{result}"')
+        else:
+            # If filtered result is None, retrieve company without users
+            query = select(Company).where(Company.id == company_id)
+            result: Company = await self.get_instance(query)
+
         return result
 
     async def get_company_members(self, company_id: int) -> list[CompanyMember]:
@@ -74,6 +85,22 @@ class CompanyRepository(BaseRepository):
             logger.debug(f'Retrieved company "{company_id}" members: "{result}"')
 
         return [CompanyMember(id=member[0], role=member[1]) for member in result]
+
+    async def get_company_owner(self, company_id: int) -> User:
+        query = (
+            select(User)
+            .join(CompanyUser, CompanyUser.user_id == User.id)
+            .where(
+                (CompanyUser.company_id == company_id)
+                & (CompanyUser.role == RoleEnum.Owner)
+            )
+        )
+
+        result: User = await self.get_instance(query)
+        if result:
+            logger.debug(f'Retrieved company "{company_id}" owner: "{result}"')
+
+        return result
 
     async def update_company(
         self, company_id: int, company_data: CompanyUpdate

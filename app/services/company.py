@@ -80,11 +80,18 @@ class CompanyService(BaseService):
 
         return []
 
-    async def get_company_by_id(self, company_id: int) -> CompanyFullSchema:
+    async def get_company_by_id(
+        self, company_id: int, filter_string: str
+    ) -> CompanyFullSchema:
         await self._validate_instance_exists(self.company_repository, company_id)
 
-        company = await self.company_repository.get_company_by_id(company_id)
-        return CompanyFullSchema.from_model(company)
+        # Retrieve company owner instance
+        owner = await self.company_repository.get_company_owner(company_id)
+
+        company = await self.company_repository.get_company_by_id(
+            company_id, filter_string
+        )
+        return CompanyFullSchema.from_model(company, owner)
 
     async def update_company(
         self, company_id: int, company_data: CompanyUpdate, current_user_id: int

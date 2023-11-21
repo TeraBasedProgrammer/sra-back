@@ -9,8 +9,8 @@ from app.models.schemas.auth import UserSignUpOutput
 from app.models.schemas.companies import (
     CompanyCreate,
     CompanyCreateSuccess,
+    CompanyList,
     CompanyUpdate,
-    UserCompanyM2m,
 )
 from app.models.schemas.company_user import CompanyFullSchema, UserFullSchema
 from app.models.schemas.users import CompanyMemberInput, CompanyMemberUpdate, UserCreate
@@ -61,13 +61,13 @@ class CompanyService(BaseService):
 
     async def get_user_companies(
         self, current_user_id: int
-    ) -> Optional[list[UserCompanyM2m]]:
+    ) -> Optional[list[CompanyList]]:
         companies: list[Company] = await self.company_repository.get_user_companies(
             current_user_id
         )
         if companies:
             return [
-                UserCompanyM2m(title=company.title, role=company.role, id=company.id)
+                CompanyList(title=company.title, role=company.role, id=company.id)
                 for company in companies
             ]
 

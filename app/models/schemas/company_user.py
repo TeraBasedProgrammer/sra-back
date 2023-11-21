@@ -4,26 +4,12 @@ from pydantic import EmailStr
 
 from app.models.db.companies import Company, RoleEnum
 from app.models.db.users import User
-from app.models.schemas.companies import CompanySchema, UserCompanyM2m
+from app.models.schemas.companies import CompanySchema, CompanyUsers, UserCompanies
 from app.models.schemas.users import TagBaseSchema, UserSchema
 
 
 class UserFullSchema(UserSchema):
-    companies: list[UserCompanyM2m]
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "email": "user@example.com",
-                "name": "string",
-                "phone_number": "+380500505050",
-                "id": 0,
-                "registered_at": "timestamp",
-                "average_score": 0,
-                "tags": [{"id": 0, "title": "string"}],
-                "companies": [{"id": 0, "title": "string", "role": "owner"}],
-            }
-        }
+    companies: list[UserCompanies]
 
     @classmethod
     def from_model(cls, user_model: User):
@@ -39,7 +25,7 @@ class UserFullSchema(UserSchema):
                 for tag in user_model.tags
             ],
             companies=[
-                UserCompanyM2m(
+                UserCompanies(
                     id=company.companies.id,
                     title=company.companies.title,
                     role=company.role,
@@ -53,7 +39,7 @@ class CompanyFullSchema(CompanySchema):
     owner_email: EmailStr
     owner_phone: Optional[str]
     owner_name: Optional[str]
-    users: list[UserCompanyM2m]
+    users: Optional[list[CompanyUsers]]
 
     @classmethod
     def from_model(cls, company_instance: Company):
@@ -70,25 +56,14 @@ class CompanyFullSchema(CompanySchema):
             owner_phone=owner.phone_number,
             owner_name=owner.name,
             users=[
-                UserCompanyM2m(
+                CompanyUsers(
                     id=user.users.id,
                     name=user.users.name,
+                    phone_number=user.users.phone_number,
+                    email=user.users.email,
                     role=user.role,
                 )
                 for user in company_instance.users
+                if company_instance.users is not None
             ],
         )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "title": "string",
-                "description": "string",
-                "owner_email": "user@example.com",
-                "owner_phone": "string",
-                "owner_name": "string",
-                "id": 0,
-                "created_at": "2023-11-16T13:21:00.469Z",
-                "users": [{"id": 0, "name": "string", "role": "owner"}],
-            }
-        }

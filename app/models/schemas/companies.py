@@ -42,16 +42,24 @@ class CompanySchema(CompanyBase):
 class CompanyList(BaseModel):
     id: int
     title: str
+    role: RoleEnum
 
 
-class UserCompanyM2m(BaseModel):
+class CompanyUsers(BaseModel):
     id: int
-    title: Optional[str] = Field(None, nullable=True)
     name: Optional[str] = Field(None, nullable=True)
+    email: Optional[str] = Field(None, nullable=True)
+    phone_number: Optional[str] = Field(None, nullable=True)
     role: Optional[RoleEnum] = Field(None, nullable=True)
 
     class Config:
         from_attributes = True
+
+
+class UserCompanies(BaseModel):
+    id: int
+    title: str
+    role: RoleEnum
 
 
 class CompanyUpdate(CompanyBase):

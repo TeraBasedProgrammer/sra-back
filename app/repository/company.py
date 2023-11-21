@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import contains_eager
 
 from app.config.logs.logger import logger
 from app.models.db.companies import Company, CompanyUser, RoleEnum
@@ -52,10 +52,13 @@ class CompanyRepository(BaseRepository):
 
         query = (
             select(Company)
-            .options(joinedload(Company.users))
+            .join(Company.users)
+            .join(CompanyUser.users)
+            .options(contains_eager(Company.users).contains_eager(CompanyUser.users))
             .where(Company.id == company_id)
         )
         result: Company = await self.get_instance(query)
+
         if result:
             logger.debug(f'Retrieved company by id "{company_id}": "{result}"')
         return result

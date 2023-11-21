@@ -47,6 +47,13 @@ class CompanyService(BaseService):
     async def create_company(
         self, company_data: CompanyCreate, current_user: User
     ) -> CompanyCreateSuccess:
+        # Validate if user is not the member of another company
+        for company in current_user.companies:
+            if company.role != RoleEnum.Owner:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    error_wrapper("You're already a member of another company", None),
+                )
         try:
             company_id = await self.company_repository.create_company(
                 company_data, current_user

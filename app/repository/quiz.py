@@ -33,9 +33,6 @@ class QuizRepository(BaseRepository):
         if result:
             logger.debug(f'Retrieved quiz by id "{quiz_id}": "{result}"')
 
-            # Temporaty solution to make m2m fields compatible with Pydantic
-            result.tags = [tag.tags for tag in result.tags]
-            result.questions = [question.questions for question in result.questions]
         return result
 
     async def get_quiz_data(self, quiz_id: int) -> Quiz:
@@ -70,7 +67,6 @@ class QuizRepository(BaseRepository):
         self, company_id: int, user_tags: list[Tag]
     ) -> list[Quiz]:
         logger.debug(f"Received data:\n{get_args()}")
-        logger.critical(user_tags)
         tag_ids = [tag.id for tag in user_tags]
 
         query = (
@@ -86,6 +82,7 @@ class QuizRepository(BaseRepository):
             # Temporaty solution to make m2m fields compatible with Pydantic
             for quiz in result:
                 quiz.tags = [tag.tags for tag in quiz.tags]
+                logger.critical(quiz.__dict__)
         return result
 
     async def get_quiz_company_id(self, quiz_id: int) -> int:

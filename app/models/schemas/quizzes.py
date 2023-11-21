@@ -3,6 +3,7 @@ from typing import Annotated, Optional
 from annotated_types import Gt
 from pydantic import BaseModel, field_validator
 
+from app.models.db.quizzes import Quiz
 from app.models.schemas.tags import TagBaseSchema
 from app.utilities.validators.payload.datetime import (
     validate_date_format,
@@ -73,6 +74,18 @@ class QuizBase(BaseModel):
     def validate_end_time(cls, value):
         return validate_time_format(value, "end_time")
 
+    @classmethod
+    def from_model(cls, quiz_instance: Quiz):
+        return cls(
+            title=quiz_instance.title,
+            description=quiz_instance.description,
+            completion_time=quiz_instance.completion_time,
+            start_date=quiz_instance.start_date,
+            start_time=quiz_instance.start_time,
+            end_date=quiz_instance.end_date,
+            end_time=quiz_instance.end_time,
+        )
+
 
 class QuizCreateInput(QuizBase):
     company_id: int
@@ -109,6 +122,33 @@ class QuizFullSchema(QuizBase):
     class Config:
         from_attributes: True
 
+    @classmethod
+    def from_model(cls, quiz_instance: Quiz):
+        return cls(
+            **QuizBase.from_model(quiz_instance).model_dump(),
+            company_id=quiz_instance.company_id,
+            questions=[
+                QuestionSchema(
+                    title=question.questions.title,
+                    quiz_id=question.questions.quiz_id,
+                    type=question.questions.type,
+                    answers=[
+                        AnswerSchema(
+                            title=answer.answers.title,
+                            is_correct=answer.answers.is_correct,
+                            question_id=answer.answers.question_id,
+                        )
+                        for answer in question.questions
+                    ],
+                )
+                for question in quiz_instance.questions
+            ],
+            tags=[
+                TagBaseSchema(id=tag.tags.id, title=tag.tags.title)
+                for tag in quiz_instance.tags
+            ],
+        )
+
 
 class QuizEmployeeSchema(QuizBase):
     company_id: int
@@ -116,6 +156,16 @@ class QuizEmployeeSchema(QuizBase):
 
     class Config:
         from_attributes: True
+
+    @classmethod
+    def from_model(cls, quiz_instance: Quiz):
+        return cls(
+            **QuizBase.from_model(quiz_instance).model_dump(),
+            tags=[
+                TagBaseSchema(id=tag.tags.id, title=tag.tags.title)
+                for tag in quiz_instance.tags
+            ],
+        )
 
 
 class QuizListSchema(BaseModel):

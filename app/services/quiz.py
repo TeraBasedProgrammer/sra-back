@@ -120,9 +120,9 @@ class QuizService(BaseService):
 
         # Define what data has to be returned depending on user role
         if current_user_data.role == RoleEnum.Employee:
-            return QuizEmployeeSchema.model_validate(quiz, from_attributes=True)
+            return QuizEmployeeSchema.from_model(quiz, from_attributes=True)
 
-        return QuizFullSchema.model_validate(quiz, from_attributes=True)
+        return QuizFullSchema.from_model(quiz)
 
     async def get_all_company_quizzes(
         self, company_id: int, current_user_id: int

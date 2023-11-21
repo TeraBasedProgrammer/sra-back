@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr
 from sqlalchemy.exc import MissingGreenlet
 
 from app.models.db.companies import Company

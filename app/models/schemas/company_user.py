@@ -1,8 +1,9 @@
 from typing import Optional
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
+from sqlalchemy.exc import MissingGreenlet
 
-from app.models.db.companies import Company, RoleEnum
+from app.models.db.companies import Company
 from app.models.db.users import User
 from app.models.schemas.companies import CompanySchema, CompanyUsers, UserCompanies
 from app.models.schemas.users import TagBaseSchema, UserSchema
@@ -39,22 +40,23 @@ class CompanyFullSchema(CompanySchema):
     owner_email: EmailStr
     owner_phone: Optional[str]
     owner_name: Optional[str]
-    users: Optional[list[CompanyUsers]]
+    users: list[CompanyUsers]
 
     @classmethod
-    def from_model(cls, company_instance: Company):
-        owner = list(
-            filter(lambda u: u.role == RoleEnum.Owner, company_instance.users)
-        )[0].users
-
+    def _initialize_schema_instance(
+        cls,
+        company_instance: Company,
+        owner_instance: User,
+        users: Optional[list[User]],
+    ):
         return cls(
             id=company_instance.id,
             title=company_instance.title,
             description=company_instance.description,
             created_at=company_instance.created_at,
-            owner_email=owner.email,
-            owner_phone=owner.phone_number,
-            owner_name=owner.name,
+            owner_email=owner_instance.email,
+            owner_phone=owner_instance.phone_number,
+            owner_name=owner_instance.name,
             users=[
                 CompanyUsers(
                     id=user.users.id,
@@ -63,7 +65,16 @@ class CompanyFullSchema(CompanySchema):
                     email=user.users.email,
                     role=user.role,
                 )
-                for user in company_instance.users
-                if company_instance.users is not None
+                for user in users
             ],
         )
+
+    @classmethod
+    def from_model(cls, company_instance: Company, owner_instance: User):
+        # Validate if Company's users field is empty
+        try:
+            return cls._initialize_schema_instance(
+                company_instance, owner_instance, company_instance.users
+            )
+        except MissingGreenlet:
+            return cls._initialize_schema_instance(company_instance, owner_instance, [])

@@ -37,6 +37,7 @@ class UserFullSchema(UserSchema):
 
 
 class CompanyFullSchema(CompanySchema):
+    staff_count: int
     owner_email: EmailStr
     owner_phone: Optional[str]
     owner_name: Optional[str]
@@ -46,6 +47,7 @@ class CompanyFullSchema(CompanySchema):
     def _initialize_schema_instance(
         cls,
         company_instance: Company,
+        staff_count: int,
         owner_instance: User,
         users: Optional[list[User]],
     ):
@@ -53,6 +55,7 @@ class CompanyFullSchema(CompanySchema):
             id=company_instance.id,
             title=company_instance.title,
             description=company_instance.description,
+            staff_count=staff_count,
             created_at=company_instance.created_at,
             owner_email=owner_instance.email,
             owner_phone=owner_instance.phone_number,
@@ -70,11 +73,15 @@ class CompanyFullSchema(CompanySchema):
         )
 
     @classmethod
-    def from_model(cls, company_instance: Company, owner_instance: User):
+    def from_model(
+        cls, company_instance: Company, staff_count: int, owner_instance: User
+    ):
         # Validate if Company's users field is empty
         try:
             return cls._initialize_schema_instance(
-                company_instance, owner_instance, company_instance.users
+                company_instance, staff_count, owner_instance, company_instance.users
             )
         except MissingGreenlet:
-            return cls._initialize_schema_instance(company_instance, owner_instance, [])
+            return cls._initialize_schema_instance(
+                company_instance, staff_count, owner_instance, []
+            )

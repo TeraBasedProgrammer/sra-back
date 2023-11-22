@@ -88,10 +88,13 @@ class CompanyService(BaseService):
         # Retrieve company owner instance
         owner = await self.company_repository.get_company_owner(company_id)
 
+        # Retrieve company staff count
+        staff_count = len(await self.company_repository.get_company_members(company_id))
+
         company = await self.company_repository.get_company_by_id(
             company_id, filter_string
         )
-        return CompanyFullSchema.from_model(company, owner)
+        return CompanyFullSchema.from_model(company, staff_count, owner)
 
     async def update_company(
         self, company_id: int, company_data: CompanyUpdate, current_user_id: int

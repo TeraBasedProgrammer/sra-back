@@ -216,6 +216,11 @@ class CompanyService(BaseService):
             if company.companies.id == company_id and company.role == RoleEnum.Owner:
                 raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
+        if member_data.role:
+            await self._validate_passed_role(member_data)
+            member.companies[0].role = RoleEnum(member_data.role)
+            await self.user_repository.save(member)
+
         if member_data.tags:
             await self._validate_tag_ids(self.tag_repository, member_data)
 
@@ -224,11 +229,6 @@ class CompanyService(BaseService):
             await self.user_repository.save_many(
                 [TagUser(user_id=member_id, tag_id=tag) for tag in member_data.tags]
             )
-
-        if member_data.role:
-            await self._validate_passed_role(member_data)
-            member.companies[0].role = RoleEnum(member_data.role)
-            await self.user_repository.save(member)
 
         new_member = await self.user_repository.get_user_by_id(member_id)
         return UserFullSchema.from_model(new_member)

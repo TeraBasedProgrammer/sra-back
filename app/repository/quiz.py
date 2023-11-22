@@ -82,7 +82,6 @@ class QuizRepository(BaseRepository):
             # Temporaty solution to make m2m fields compatible with Pydantic
             for quiz in result:
                 quiz.tags = [tag.tags for tag in quiz.tags]
-                logger.critical(quiz.__dict__)
         return result
 
     async def get_quiz_company_id(self, quiz_id: int) -> int:

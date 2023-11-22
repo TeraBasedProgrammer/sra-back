@@ -241,7 +241,7 @@ class QuizService(BaseService):
                 await self.quiz_repository.update_quiz(quiz_id, quiz_data)
             updated_quiz: Quiz = await self.quiz_repository.get_full_quiz(quiz_id)
 
-            return QuizFullSchema.model_validate(updated_quiz, from_attributes=True)
+            return QuizFullSchema.from_model(updated_quiz)
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,

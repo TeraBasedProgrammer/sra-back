@@ -85,3 +85,4 @@ class BaseRepository:
     async def save_many(self, objects: list[Any]):
         self.async_session.add_all(objects)
         await self.async_session.commit()
+        self.async_session.expire_all()

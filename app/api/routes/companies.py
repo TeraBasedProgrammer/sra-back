@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import auth_wrapper
@@ -37,8 +39,8 @@ router = APIRouter(
     responses=company_docs.get_company(),
 )
 async def get_company(
-    filter: str,
     company_id: int,
+    filter: Optional[str] = "",
     company_service: CompanyService = Depends(get_company_service),
     auth=Depends(auth_wrapper),
 ) -> CompanyFullSchema:

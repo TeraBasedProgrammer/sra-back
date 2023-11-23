@@ -1,5 +1,6 @@
 import re
 from typing import Optional
+from uuid import UUID
 
 from fastapi import HTTPException, status
 
@@ -42,3 +43,20 @@ def validate_text(
         )
 
     return value
+
+
+def validate_question_temp_uuid(value: str) -> str:
+    try:
+        UUID(value)
+        return value
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_wrapper(
+                (
+                    "One of the questions has invalid temp UUID field. Ensure you provided valid UUID "
+                    "(aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee) for each question"
+                ),
+                "question_temp_uuid",
+            ),
+        )

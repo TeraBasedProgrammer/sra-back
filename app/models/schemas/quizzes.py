@@ -9,30 +9,49 @@ from app.utilities.validators.payload.datetime import (
     validate_date_format,
     validate_time_format,
 )
-from app.utilities.validators.payload.text import validate_text
+from app.utilities.validators.payload.text import (
+    validate_question_temp_uuid,
+    validate_text,
+)
 
 
-class AnswerSchema(BaseModel):
+class AnswerBaseSchema(BaseModel):
     title: str
     is_correct: bool
+
+    @field_validator("title")
+    @classmethod
+    def validate_company_title(cls, value):
+        return validate_text(value, "title", min_length=5, max_length=100)
+
+
+class AnswerSchema(AnswerBaseSchema):
     question_id: int
 
+
+class QuestionBaseSchema(BaseModel):
+    title: str
+    type: str
+
     @field_validator("title")
     @classmethod
     def validate_company_title(cls, value):
         return validate_text(value, "title", min_length=5, max_length=100)
 
 
-class QuestionSchema(BaseModel):
-    title: str
+class QuestionSchema(QuestionBaseSchema):
     quiz_id: int
-    type: str
     answers: list[AnswerSchema]
 
-    @field_validator("title")
+
+class QuestionCreateInput(QuestionBaseSchema):
+    temp_uuid: str
+    answers: list[AnswerBaseSchema]
+
+    @field_validator("temp_uuid")
     @classmethod
-    def validate_company_title(cls, value):
-        return validate_text(value, "title", min_length=5, max_length=100)
+    def validate_question_temp_uuid(cls, value):
+        return validate_question_temp_uuid(value)
 
 
 class QuizBase(BaseModel):
@@ -90,6 +109,7 @@ class QuizBase(BaseModel):
 class QuizCreateInput(QuizBase):
     company_id: int
     tags: list[int]
+    questions: list[QuestionCreateInput]
 
 
 class QuizCreateOutput(BaseModel):

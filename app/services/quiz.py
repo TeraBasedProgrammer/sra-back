@@ -4,9 +4,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.models.db.companies import RoleEnum
-from app.models.db.quizzes import Quiz
+from app.models.db.quizzes import QuestionTypeEnum, Quiz
 from app.models.db.users import Tag, TagQuiz
 from app.models.schemas.quizzes import (
+    QuestionCreateInput,
     QuizCreateInput,
     QuizCreateOutput,
     QuizEmployeeSchema,
@@ -18,7 +19,7 @@ from app.repository.company import CompanyMember, CompanyRepository
 from app.repository.quiz import QuizRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
-from app.utilities.formatters.http_error import error_wrapper
+from app.utilities.formatters.http_error import error_wrapper, question_error_wrapper
 
 
 class QuizService(BaseService):
@@ -102,6 +103,129 @@ class QuizService(BaseService):
                 ),
             )
 
+    def _validate_question_type(self, question: QuestionCreateInput) -> None:
+        # Validate each question has a correct type
+        try:
+            QuestionTypeEnum(question.type)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Invalid question type", "type", question.temp_uuid
+                ),
+            )
+
+    def _validate_answers_count(self, question: QuestionCreateInput) -> None:
+        # Validate questions has proper amount of answers (based on type)
+        if (
+            question.type != QuestionTypeEnum.OpenAnswer.value
+            and len(question.answers) < 2
+        ):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Question should contain at least 2 answers",
+                    "answers",
+                    question.temp_uuid,
+                ),
+            )
+        elif (
+            question.type == QuestionTypeEnum.OpenAnswer.value
+            and len(question.answers) != 1
+        ):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Question with open answer should have 1 answer marked as 'Correct'",
+                    "answers",
+                    question.temp_uuid,
+                ),
+            )
+
+    def _validate_duplicate_answers(self, question: QuestionCreateInput) -> None:
+        # Validate that question doesn't have duplicated answers
+        answers_titles = [answer.title for answer in question.answers]
+        if len(answers_titles) != len(set(answers_titles)):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Each answer has to have a unique title",
+                    "answers",
+                    question.temp_uuid,
+                ),
+            )
+
+    def _validate_correct_answers_count(self, question: QuestionCreateInput) -> None:
+        # Validate each question has a proper amount of correct answers (based on type)
+        correct_answers = [answer for answer in question.answers if answer.is_correct]
+        if (
+            question.type != QuestionTypeEnum.MultipleChoice.value
+            and len(correct_answers) != 1
+        ):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Question should have 1 correct answer",
+                    "answers",
+                    question.temp_uuid,
+                ),
+            )
+        elif (
+            question.type == QuestionTypeEnum.MultipleChoice.value
+            and len(correct_answers) < 1
+        ):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=question_error_wrapper(
+                    "Question should have at least 1 correct answer",
+                    "answers",
+                    question.temp_uuid,
+                ),
+            )
+
+    async def _validate_quiz_questions(
+        self, questions: list[QuestionCreateInput]
+    ) -> None:
+        # Validate quiz has at least 2 questions
+        if len(questions) < 2:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    "Quiz should contain at least 2 questions", "questions"
+                ),
+            )
+
+        # Validate each question has a unique temp UUID
+        questions_uuids = [question.temp_uuid for question in questions]
+        if len(questions_uuids) != len(set(questions_uuids)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    (
+                        "Question UUID should be a unique value. Ensure "
+                        "you provided a unique UUID for each question"
+                    ),
+                    "question_temp_uuid",
+                ),
+            )
+
+        # Validate quiz questions don't  have duplicates
+        question_titles = [question.title for question in questions]
+        if len(question_titles) != len(set(question_titles)):
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    "Each question has to have a unique title",
+                    "questions",
+                ),
+            )
+
+        for question in questions:
+            self._validate_question_type(question)
+            self._validate_answers_count(question)
+            self._validate_duplicate_answers(question)
+            self._validate_correct_answers_count(question)
+
     async def get_quiz(
         self, quiz_id: int, current_user_id: int
     ) -> QuizFullSchema | QuizEmployeeSchema:
@@ -175,14 +299,16 @@ class QuizService(BaseService):
             current_user_id,
             (RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Tester),
         )
-
         self._validate_quiz_deadlines(quiz_data)
-
         await self._validate_tag_ids(self.tag_repository, quiz_data)
+        await self._validate_quiz_questions(quiz_data.questions)
 
         try:
             quiz_tags = quiz_data.tags
+            quiz_questions = quiz_data.questions
+
             quiz_data.tags = []
+            quiz_data.questions = []
             quiz: Quiz = await self.quiz_repository.create_quiz(quiz_data)
             new_quiz_tags: list[TagQuiz] = [
                 TagQuiz(tag_id=tag_id, quiz_id=quiz.id) for tag_id in quiz_tags

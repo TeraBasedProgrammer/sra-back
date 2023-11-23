@@ -6,7 +6,7 @@ from app.utilities.formatters.http_error import error_wrapper
 
 
 def validate_date_format(value: str, field_name: str):
-    if not value:
+    if value is None:
         return value
 
     try:
@@ -24,7 +24,7 @@ def validate_date_format(value: str, field_name: str):
 
 
 def validate_time_format(value: str, field_name: str):
-    if not value:
+    if value is None:
         return value
 
     try:

@@ -21,7 +21,7 @@ def validate_password(value: str, field_name: str = "password"):
 
 @string_stripper
 def validate_name(value: str):
-    if not value:
+    if value is None:
         return value
     if not (2 <= len(value) <= 25):
         logger.warning("Validation error: 'name' has invalid length")
@@ -41,7 +41,7 @@ def validate_name(value: str):
 
 @string_stripper
 def validate_phone_number(value: str):
-    if not value:
+    if value is None:
         return value
     if not (8 <= len(value[1:]) <= 20):
         logger.warning("Validation error: 'phone_number' has invalid length")

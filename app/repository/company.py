@@ -39,7 +39,7 @@ class CompanyRepository(BaseRepository):
     async def get_user_companies(self, current_user_id: int) -> list[Company]:
         query = (
             select(Company)
-            .join(CompanyUser, CompanyUser.user_id == current_user_id)
+            .join(CompanyUser, CompanyUser.company_id == Company.id)
             .where(CompanyUser.user_id == current_user_id)
         ).with_only_columns(Company.id, Company.title, CompanyUser.role)
         response = await self.async_session.execute(query)

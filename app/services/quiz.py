@@ -16,6 +16,7 @@ from app.models.schemas.quizzes import (
     QuizUpdate,
 )
 from app.repository.company import CompanyMember, CompanyRepository
+from app.repository.question import QuestionRepository
 from app.repository.quiz import QuizRepository
 from app.repository.tag import TagRepository
 from app.services.base import BaseService
@@ -23,10 +24,13 @@ from app.utilities.formatters.http_error import error_wrapper, question_error_wr
 
 
 class QuizService(BaseService):
-    def __init__(self, quiz_repository, company_repository, tag_repository) -> None:
+    def __init__(
+        self, quiz_repository, company_repository, tag_repository, question_repository
+    ) -> None:
         self.quiz_repository: QuizRepository = quiz_repository
         self.company_repository: CompanyRepository = company_repository
         self.tag_repository: TagRepository = tag_repository
+        self.question_repository: QuestionRepository = question_repository
 
     def _validate_quiz_deadlines(
         self, quiz_data: QuizCreateInput | QuizUpdate
@@ -117,10 +121,7 @@ class QuizService(BaseService):
 
     def _validate_answers_count(self, question: QuestionCreateInput) -> None:
         # Validate questions has proper amount of answers (based on type)
-        if (
-            question.type != QuestionTypeEnum.OpenAnswer.value
-            and len(question.answers) < 2
-        ):
+        if question.type != QuestionTypeEnum.OpenAnswer and len(question.answers) < 2:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail=question_error_wrapper(
@@ -130,8 +131,7 @@ class QuizService(BaseService):
                 ),
             )
         elif (
-            question.type == QuestionTypeEnum.OpenAnswer.value
-            and len(question.answers) != 1
+            question.type == QuestionTypeEnum.OpenAnswer and len(question.answers) != 1
         ):
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
@@ -159,7 +159,7 @@ class QuizService(BaseService):
         # Validate each question has a proper amount of correct answers (based on type)
         correct_answers = [answer for answer in question.answers if answer.is_correct]
         if (
-            question.type != QuestionTypeEnum.MultipleChoice.value
+            question.type != QuestionTypeEnum.MultipleChoice
             and len(correct_answers) != 1
         ):
             raise HTTPException(
@@ -171,7 +171,7 @@ class QuizService(BaseService):
                 ),
             )
         elif (
-            question.type == QuestionTypeEnum.MultipleChoice.value
+            question.type == QuestionTypeEnum.MultipleChoice
             and len(correct_answers) < 1
         ):
             raise HTTPException(
@@ -244,7 +244,7 @@ class QuizService(BaseService):
 
         # Define what data has to be returned depending on user role
         if current_user_data.role == RoleEnum.Employee:
-            return QuizEmployeeSchema.from_model(quiz, from_attributes=True)
+            return QuizEmployeeSchema.from_model(quiz)
 
         return QuizFullSchema.from_model(quiz)
 
@@ -307,18 +307,22 @@ class QuizService(BaseService):
             quiz_tags = quiz_data.tags
             quiz_questions = quiz_data.questions
 
+            # Clear related instances to save only Quiz data
             quiz_data.tags = []
             quiz_data.questions = []
-            quiz: Quiz = await self.quiz_repository.create_quiz(quiz_data)
+            new_quiz_id: int = await self.quiz_repository.create_quiz(quiz_data)
             new_quiz_tags: list[TagQuiz] = [
-                TagQuiz(tag_id=tag_id, quiz_id=quiz.id) for tag_id in quiz_tags
+                TagQuiz(tag_id=tag_id, quiz_id=new_quiz_id) for tag_id in quiz_tags
             ]
 
-            # Save new M2M objects explicitly
-            for tag_quiz in new_quiz_tags:
-                await self.tag_repository.save(tag_quiz)
+            # Save quiz questions
+            await self.question_repository.save_questions(new_quiz_id, quiz_questions)
+            # await self.question_repository.save_many(quiz_questions)
 
-            return QuizCreateOutput(quiz_id=quiz.id)
+            # Save new tag objects directly
+            await self.tag_repository.save_many(new_quiz_tags)
+
+            return QuizCreateOutput(quiz_id=new_quiz_id)
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,

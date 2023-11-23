@@ -12,13 +12,13 @@ from app.utilities.formatters.get_args import get_args
 class QuizRepository(BaseRepository):
     model = Quiz
 
-    async def create_quiz(self, quiz_data: QuizCreateInput) -> Quiz:
+    async def create_quiz(self, quiz_data: QuizCreateInput) -> int:
         logger.debug(f"Received data:\n{get_args()}")
 
         new_quiz: Quiz = await self.create(quiz_data)
 
         logger.debug("Successfully inserted new quiz instance into the database")
-        return new_quiz
+        return new_quiz.id
 
     async def get_full_quiz(self, quiz_id: int) -> Quiz:
         logger.debug(f"Received data:\n{get_args()}")

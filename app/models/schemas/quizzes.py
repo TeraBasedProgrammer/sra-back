@@ -3,7 +3,7 @@ from typing import Annotated, Optional
 from annotated_types import Gt
 from pydantic import BaseModel, field_validator
 
-from app.models.db.quizzes import Quiz
+from app.models.db.quizzes import QuestionTypeEnum, Quiz
 from app.models.schemas.tags import TagBaseSchema
 from app.utilities.validators.payload.datetime import (
     validate_date_format,
@@ -31,7 +31,7 @@ class AnswerSchema(AnswerBaseSchema):
 
 class QuestionBaseSchema(BaseModel):
     title: str
-    type: str
+    type: QuestionTypeEnum
 
     @field_validator("title")
     @classmethod
@@ -149,16 +149,16 @@ class QuizFullSchema(QuizBase):
             company_id=quiz_instance.company_id,
             questions=[
                 QuestionSchema(
-                    title=question.questions.title,
-                    quiz_id=question.questions.quiz_id,
-                    type=question.questions.type,
+                    title=question.title,
+                    quiz_id=question.quiz_id,
+                    type=question.type,
                     answers=[
                         AnswerSchema(
-                            title=answer.answers.title,
-                            is_correct=answer.answers.is_correct,
-                            question_id=answer.answers.question_id,
+                            title=answer.title,
+                            is_correct=answer.is_correct,
+                            question_id=answer.question_id,
                         )
-                        for answer in question.questions
+                        for answer in question.answers
                     ],
                 )
                 for question in quiz_instance.questions
@@ -181,6 +181,7 @@ class QuizEmployeeSchema(QuizBase):
     def from_model(cls, quiz_instance: Quiz):
         return cls(
             **QuizBase.from_model(quiz_instance).model_dump(),
+            company_id=quiz_instance.company_id,
             tags=[
                 TagBaseSchema(id=tag.tags.id, title=tag.tags.title)
                 for tag in quiz_instance.tags

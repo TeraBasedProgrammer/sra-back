@@ -42,6 +42,11 @@ async def create_quiz(
 ) -> QuizCreateOutput:
     """
     Allows to create a new Quiz within the company
+
+    Allowed question types:
+    1. "single_choice"
+    2. "multiple_choice"
+    3. "open_answer"
     """
     return await quiz_service.create_quiz(quiz_data, current_user_id)
 

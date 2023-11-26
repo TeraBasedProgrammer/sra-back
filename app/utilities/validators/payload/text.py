@@ -45,6 +45,7 @@ def validate_text(
     return value
 
 
+@string_stripper
 def validate_question_temp_uuid(value: str) -> str:
     try:
         UUID(value)

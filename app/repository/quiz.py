@@ -91,9 +91,9 @@ class QuizRepository(BaseRepository):
             Quiz.company_id
         )
 
-        result: int = await self.async_session.execute(query)
+        result = await self.async_session.execute(query)
         logger.debug(f'Retrieved quiz "{quiz_id}" company_id: "{result}"')
-        return result
+        return result.scalar_one_or_none()
 
     async def update_quiz(self, quiz_id: int, quiz_data: QuizUpdate) -> Quiz:
         logger.debug(f"Received data:\n{get_args()}")

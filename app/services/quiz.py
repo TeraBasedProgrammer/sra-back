@@ -1,13 +1,17 @@
+import uuid
 from datetime import datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.models.db.companies import RoleEnum
-from app.models.db.quizzes import QuestionTypeEnum, Quiz
+from app.models.db.quizzes import Question, QuestionTypeEnum, Quiz
 from app.models.db.users import Tag, TagQuiz
 from app.models.schemas.quizzes import (
+    AnswerBaseSchema,
     QuestionCreateInput,
+    QuestionSchema,
+    QuestionUpdate,
     QuizCreateInput,
     QuizCreateOutput,
     QuizEmployeeSchema,
@@ -69,6 +73,14 @@ class QuizService(BaseService):
                 detail=error_wrapper(
                     "The end date can't be earlier than the start date or be the same",
                     "end_date",
+                ),
+            )
+        elif (end_date - start_date).total_seconds() < quiz_data.completion_time * 60:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    "The completion time can't be longer than the deadline",
+                    "completion_time",
                 ),
             )
 
@@ -209,7 +221,7 @@ class QuizService(BaseService):
                 ),
             )
 
-        # Validate quiz questions don't  have duplicates
+        # Validate quiz questions don't have duplicates
         question_titles = [question.title for question in questions]
         if len(question_titles) != len(set(question_titles)):
             raise HTTPException(
@@ -310,6 +322,7 @@ class QuizService(BaseService):
             # Clear related instances to save only Quiz data
             quiz_data.tags = []
             quiz_data.questions = []
+
             new_quiz_id: int = await self.quiz_repository.create_quiz(quiz_data)
             new_quiz_tags: list[TagQuiz] = [
                 TagQuiz(tag_id=tag_id, quiz_id=new_quiz_id) for tag_id in quiz_tags
@@ -379,6 +392,63 @@ class QuizService(BaseService):
                     "Quiz with this title already exists within the company", "title"
                 ),
             )
+
+    async def update_question(
+        self, question_id: int, question_data: QuestionUpdate, current_user_id: int
+    ) -> QuestionSchema:
+        await self._validate_instance_exists(self.question_repository, question_id)
+        self._validate_update_data(question_data)
+
+        question: Question = await self.question_repository.get_question_by_id(
+            question_id
+        )
+
+        company_id: int = await self.quiz_repository.get_quiz_company_id(
+            question.quiz_id
+        )
+        await self._validate_user_permissions(
+            self.company_repository,
+            company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Tester),
+        )
+
+        # Gather existing question's data and new data to correctly validate it
+        question_validation_data = QuestionCreateInput(
+            temp_uuid=str(uuid.uuid4()),
+            title=question.title,
+            type=question_data.type or question.type,
+            answers=question_data.answers
+            or [
+                AnswerBaseSchema.model_validate(answer, from_attributes=True)
+                for answer in question.answers
+            ],
+        )
+
+        # Validate question
+        self._validate_question_type(question_validation_data)
+        self._validate_answers_count(question_validation_data)
+        self._validate_duplicate_answers(question_validation_data)
+        self._validate_correct_answers_count(question_validation_data)
+
+        try:
+            await self.question_repository.update_question(
+                question.quiz_id, question_id, question_data
+            )
+            updated_question = await self.question_repository.get_question_by_id(
+                question_id
+            )
+            return QuestionSchema.model_validate(updated_question, from_attributes=True)
+        except IntegrityError:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=error_wrapper(
+                    "Question with this title already exists within the quiz", "title"
+                ),
+            )
+
+    async def delete_question(self, question_id: int, current_user_id: int) -> None:
+        pass
 
     async def delete_quiz(self, quiz_id: int, current_user_id: int) -> None:
         await self._validate_instance_exists(self.quiz_repository, quiz_id)

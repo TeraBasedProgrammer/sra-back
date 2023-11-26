@@ -40,6 +40,7 @@ class QuestionBaseSchema(BaseModel):
 
 
 class QuestionSchema(QuestionBaseSchema):
+    id: int
     quiz_id: int
     answers: list[AnswerSchema]
 
@@ -52,6 +53,17 @@ class QuestionCreateInput(QuestionBaseSchema):
     @classmethod
     def validate_question_temp_uuid(cls, value):
         return validate_question_temp_uuid(value)
+
+
+class QuestionUpdate(BaseModel):
+    title: Optional[str] = None
+    type: Optional[QuestionTypeEnum] = None
+    answers: Optional[list[AnswerBaseSchema]] = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_company_title(cls, value):
+        return validate_text(value, "title", min_length=5, max_length=100)
 
 
 class QuizBase(BaseModel):
@@ -149,6 +161,7 @@ class QuizFullSchema(QuizBase):
             company_id=quiz_instance.company_id,
             questions=[
                 QuestionSchema(
+                    id=question.id,
                     title=question.title,
                     quiz_id=question.quiz_id,
                     type=question.type,

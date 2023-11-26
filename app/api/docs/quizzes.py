@@ -105,5 +105,44 @@ class QuizDocumentation(ResponseDocumentation):
 
         return responses
 
+    def update_question(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_quiz_responses(),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["body", "answers", 0, "is_correct"],
+                "Input should be a valid boolean, unable to interpret input",
+            ),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "Invalid question type",
+                "type",
+            ),
+            status.HTTP_409_CONFLICT: self._409_response(
+                "Question with this title already exists within the quiz",
+                {
+                    "detail": error_wrapper(
+                        "Question with this title already exists within the quiz",
+                        "title",
+                    )
+                },
+            ),
+        }
+
+        return responses
+
+    def delete_question(self) -> dict[int, dict]:
+        responses: dict[int, dict] = {
+            **self._default_quiz_responses(),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: self._422_response(
+                ["path", "question_id"],
+                "Input should be a valid integer, unable to parse string as an integer",
+            ),
+            status.HTTP_400_BAD_REQUEST: self._400_response(
+                "The quiz shoud have at least 3 questions to perform this operation",
+                None,
+            ),
+        }
+
+        return responses
+
 
 quiz_docs = QuizDocumentation()

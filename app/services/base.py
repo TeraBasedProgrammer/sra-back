@@ -69,18 +69,20 @@ class BaseService:
         if not user_is_member:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Member is not found")
 
-    async def _validate_tag_ids(self, tag_repository: TagRepository, data: Any) -> None:
+    async def _validate_tag_ids(
+        self, tag_repository: TagRepository, data: Any, company_id: int
+    ) -> None:
         if data.tags == []:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail=error_wrapper("At least one tag id should be provided", "tags"),
             )
 
-        if not await tag_repository.tags_exist_by_id(data.tags):
+        if not await tag_repository.tags_exist_by_id(data.tags, company_id):
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail=error_wrapper(
-                    "One or more tags are not found. Ensure you passed the correct values",
+                    "One or more tags are not found within the company. Ensure you passed the correct values",
                     "tags",
                 ),
             )

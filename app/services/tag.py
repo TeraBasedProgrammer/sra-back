@@ -54,6 +54,7 @@ class TagService(BaseService):
         )
 
         tags: list[Tag] = await self.tag_repository.get_company_tags(company_id)
+        print(tags)
         return [TagBaseSchema(id=tag.id, title=tag.title) for tag in tags]
 
     async def get_tag_by_id(self, current_user_id: int, tag_id: int) -> TagSchema:

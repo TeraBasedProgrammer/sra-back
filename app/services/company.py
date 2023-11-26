@@ -150,7 +150,7 @@ class CompanyService(BaseService):
         )
 
         await self._validate_passed_role(member_data)
-        await self._validate_tag_ids(self.tag_repository, member_data)
+        await self._validate_tag_ids(self.tag_repository, member_data, company_id)
 
         # Hash user password
         member_data.password = auth_handler.get_password_hash(member_data.password)
@@ -225,7 +225,7 @@ class CompanyService(BaseService):
             await self.user_repository.save(member)
 
         if member_data.tags is not None:
-            await self._validate_tag_ids(self.tag_repository, member_data)
+            await self._validate_tag_ids(self.tag_repository, member_data, company_id)
 
             # Recreate tags for the member
             await self.user_repository.delete_related_tag_user(member_id)

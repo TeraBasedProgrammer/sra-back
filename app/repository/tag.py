@@ -25,7 +25,7 @@ class TagRepository(BaseRepository):
             .options(load_only(Tag.id, Tag.title))
             .where(Tag.company_id == company_id)
         )
-        return await self.get_many(query)
+        return self.unpack(await self.get_many(query))
 
     async def get_user_tags(self, user_id: int) -> list[Tag]:
         query = (
@@ -56,11 +56,13 @@ class TagRepository(BaseRepository):
         logger.debug(f"Received data:\n{get_args()}")
         await self.delete(tag_id)
 
-    async def tags_exist_by_id(self, tag_ids: list[int]) -> bool:
+    async def tags_exist_by_id(self, tag_ids: list[int], company_id: int) -> bool:
         logger.debug(f"Received data:\n{get_args()}")
 
         result = await self.async_session.execute(
-            select(func.count(Tag.id)).where(Tag.id.in_(tag_ids))
+            select(func.count(Tag.id)).where(
+                (Tag.id.in_(tag_ids)) & (Tag.company_id == company_id)
+            )
         )
         count = result.scalar()
 

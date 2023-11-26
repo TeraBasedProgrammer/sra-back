@@ -312,7 +312,9 @@ class QuizService(BaseService):
             (RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Tester),
         )
         self._validate_quiz_deadlines(quiz_data)
-        await self._validate_tag_ids(self.tag_repository, quiz_data)
+        await self._validate_tag_ids(
+            self.tag_repository, quiz_data, quiz_data.company_id
+        )
         await self._validate_quiz_questions(quiz_data.questions)
 
         try:
@@ -368,7 +370,9 @@ class QuizService(BaseService):
                 break
 
         if quiz_data.tags:
-            await self._validate_tag_ids(self.tag_repository, quiz_data)
+            await self._validate_tag_ids(
+                self.tag_repository, quiz_data, existing_quiz_data.company_id
+            )
 
             # Recreate tags for the quiz
             await self.quiz_repository.delete_related_tag_quiz(quiz_id)

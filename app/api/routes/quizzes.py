@@ -74,7 +74,9 @@ async def update_quiz(
 
 
 @router.patch(
-    "/questions/{question_id}/update/", response_model=QuestionSchema, responses=None
+    "/questions/{question_id}/update/",
+    response_model=QuestionSchema,
+    responses=quiz_docs.update_question(),
 )
 async def update_question(
     question_id: int,
@@ -110,7 +112,7 @@ async def delete_quiz(
 @router.delete(
     "/questions/{question_id}/delete/",
     response_model=None,
-    responses=None,
+    responses=quiz_docs.delete_question(),
     status_code=204,
 )
 async def delete_question(

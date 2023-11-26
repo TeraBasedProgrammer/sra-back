@@ -70,6 +70,12 @@ class BaseService:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Member is not found")
 
     async def _validate_tag_ids(self, tag_repository: TagRepository, data: Any) -> None:
+        if data.tags == []:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper("At least one tag id should be provided", "tags"),
+            )
+
         if not await tag_repository.tags_exist_by_id(data.tags):
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,

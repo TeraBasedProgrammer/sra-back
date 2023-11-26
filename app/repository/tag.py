@@ -25,7 +25,7 @@ class TagRepository(BaseRepository):
             .options(load_only(Tag.id, Tag.title))
             .where(Tag.company_id == company_id)
         )
-        return self.get_many(query)
+        return await self.get_many(query)
 
     async def get_user_tags(self, user_id: int) -> list[Tag]:
         query = (

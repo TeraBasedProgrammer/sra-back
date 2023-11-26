@@ -224,7 +224,7 @@ class CompanyService(BaseService):
             member.companies[0].role = RoleEnum(member_data.role)
             await self.user_repository.save(member)
 
-        if member_data.tags:
+        if member_data.tags is not None:
             await self._validate_tag_ids(self.tag_repository, member_data)
 
             # Recreate tags for the member

@@ -1,8 +1,8 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import joinedload
 
 from app.config.logs.logger import logger
-from app.models.db.quizzes import Quiz
+from app.models.db.quizzes import Question, Quiz
 from app.models.db.users import Tag, TagQuiz
 from app.models.schemas.quizzes import QuizCreateInput, QuizUpdate
 from app.repository.base import BaseRepository
@@ -93,6 +93,14 @@ class QuizRepository(BaseRepository):
 
         result = await self.async_session.execute(query)
         logger.debug(f'Retrieved quiz "{quiz_id}" company_id: "{result}"')
+        return result.scalar_one_or_none()
+
+    async def get_questions_count(self, quiz_id: int) -> int:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        result = await self.async_session.execute(
+            select(func.count(Question.id)).where(Question.quiz_id == quiz_id)
+        )
         return result.scalar_one_or_none()
 
     async def update_quiz(self, quiz_id: int, quiz_data: QuizUpdate) -> Quiz:

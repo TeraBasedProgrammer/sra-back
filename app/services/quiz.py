@@ -448,7 +448,35 @@ class QuizService(BaseService):
             )
 
     async def delete_question(self, question_id: int, current_user_id: int) -> None:
-        pass
+        await self._validate_instance_exists(self.question_repository, question_id)
+
+        question: Question = await self.question_repository.get_question_by_id(
+            question_id
+        )
+        company_id: int = await self.quiz_repository.get_quiz_company_id(
+            question.quiz_id
+        )
+        await self._validate_user_permissions(
+            self.company_repository,
+            company_id,
+            current_user_id,
+            (RoleEnum.Owner, RoleEnum.Admin, RoleEnum.Tester),
+        )
+
+        # Validate that quiz will have at least 2 questions after this question is deleted
+        current_questions_count: int = await self.quiz_repository.get_questions_count(
+            question.quiz_id
+        )
+        if current_questions_count < 3:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=error_wrapper(
+                    "The quiz shoud have at least 3 questions to perform this operation",
+                    None,
+                ),
+            )
+
+        await self.question_repository.delete_question(question_id)
 
     async def delete_quiz(self, quiz_id: int, current_user_id: int) -> None:
         await self._validate_instance_exists(self.quiz_repository, quiz_id)

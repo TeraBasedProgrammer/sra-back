@@ -79,3 +79,12 @@ class QuestionRepository(BaseRepository):
             logger.debug(f'Retrieved question by id "{question_id}": "{result}"')
 
         return result
+
+    async def delete_question(self, question_id: int) -> None:
+        logger.debug(f"Received data:\n{get_args()}")
+        result = await self.delete(question_id)
+
+        logger.debug(
+            f'Successfully deleted question instance "{question_id}" from the database'
+        )
+        return result

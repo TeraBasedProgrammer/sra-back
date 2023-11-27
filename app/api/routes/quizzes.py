@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies.services import get_quiz_service
+from app.api.dependencies.services import get_attempt_service, get_quiz_service
 from app.api.dependencies.user import get_current_user_id
 from app.api.docs.quizzes import quiz_docs
 from app.models.db.users import User
@@ -12,7 +12,9 @@ from app.models.schemas.quizzes import (
     QuizEmployeeSchema,
     QuizFullSchema,
     QuizUpdate,
+    StartAttemptResponse,
 )
+from app.services.attempt import AttemptService
 from app.services.quiz import QuizService
 
 router = APIRouter(prefix="/quizzes", tags=["Quizzes"])
@@ -35,6 +37,20 @@ async def get_quiz(
 
 
 @router.post(
+    "/{quiz_id}/attempt/start/", response_model=StartAttemptResponse, responses=None
+)
+async def start_attempt(
+    quiz_id: int,
+    current_user_id: User = Depends(get_current_user_id),
+    attempt_service: AttemptService = Depends(get_attempt_service),
+) -> StartAttemptResponse:
+    """
+    ### Allows member to start a new attempt with a specific quiz
+    """
+    return await attempt_service.start_attempt(quiz_id, current_user_id)
+
+
+@router.post(
     "/create/",
     response_model=QuizCreateOutput,
     responses=quiz_docs.create_quiz(),
@@ -46,7 +62,7 @@ async def create_quiz(
     quiz_service: QuizService = Depends(get_quiz_service),
 ) -> QuizCreateOutput:
     """
-    Allows to create a new Quiz within the company
+    ### Allows to create a new Quiz within the company
 
     Allowed question types:
     1. "single_choice"

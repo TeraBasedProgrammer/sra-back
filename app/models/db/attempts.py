@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Time
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -16,7 +16,7 @@ class Attempt(Base):
     user = relationship("User", back_populates="attempts", lazy="select")
     start_time = Column(DateTime, default=datetime.utcnow())
     end_time = Column(DateTime)
-    spent_time = Column(String)
+    spent_time = Column(Time)
     result = Column(Integer, default=0)
 
     def __repr__(self) -> str:

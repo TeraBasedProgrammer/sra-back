@@ -32,6 +32,7 @@ class Quiz(Base):
 
     # Quiz completion time (in minutes)
     completion_time = Column(Integer, nullable=False)
+    max_attempts_count = Column(Integer, nullable=False, default=1)
 
     # Deadlines
     start_date = Column(String, nullable=False)

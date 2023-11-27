@@ -70,6 +70,7 @@ class QuizBase(BaseModel):
     title: str
     description: str
     completion_time: Annotated[int, Gt(0)]
+    max_attempts_count: Annotated[int, Gt(0)]
     start_date: str
     start_time: str
     end_date: str
@@ -110,6 +111,7 @@ class QuizBase(BaseModel):
         return cls(
             title=quiz_instance.title,
             description=quiz_instance.description,
+            max_attempts_count=quiz_instance.max_attempts_count,
             completion_time=quiz_instance.completion_time,
             start_date=quiz_instance.start_date,
             start_time=quiz_instance.start_time,
@@ -131,6 +133,7 @@ class QuizCreateOutput(BaseModel):
 class QuizUpdate(QuizBase):
     title: Optional[str] = None
     description: Optional[str] = None
+    max_attempts_count: Optional[Annotated[int, Gt(0)]] = None
     completion_time: Optional[Annotated[int, Gt(0)]] = None
     start_date: Optional[str] = None
     start_time: Optional[str] = None
@@ -210,3 +213,56 @@ class QuizListSchema(BaseModel):
     end_time: str
     end_date: str
     tags: list[TagBaseSchema]
+
+
+class AnswerAttemptSchema(BaseModel):
+    id: int
+    title: str
+    question_id: int
+
+
+class QuestionAttemptSchema(QuestionBaseSchema):
+    id: int
+    quiz_id: int
+    answers: list[AnswerAttemptSchema]
+
+
+class QuizAttemptSchema(BaseModel):
+    id: int
+    completion_time: int
+    questions: list[QuestionAttemptSchema]
+
+    @classmethod
+    def from_model(cls, quiz_instance: Quiz):
+        return cls(
+            id=quiz_instance.id,
+            completion_time=quiz_instance.completion_time,
+            questions=[
+                QuestionAttemptSchema(
+                    id=question.id,
+                    title=question.title,
+                    quiz_id=question.quiz_id,
+                    type=question.type,
+                    answers=[
+                        AnswerAttemptSchema(
+                            id=answer.id,
+                            title=answer.title,
+                            question_id=answer.question_id,
+                        )
+                        for answer in question.answers
+                    ],
+                )
+                for question in quiz_instance.questions
+            ],
+        )
+
+
+class StartAttemptResponse(QuizAttemptSchema):
+    attempt_id: int
+
+    @classmethod
+    def from_model(cls, attempt_id: int, quiz_instance: Quiz):
+        return cls(
+            attempt_id=attempt_id,
+            **QuizAttemptSchema.from_model(quiz_instance).model_dump(),
+        )

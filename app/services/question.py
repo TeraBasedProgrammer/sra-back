@@ -1,12 +1,7 @@
-from fastapi import HTTPException, status
-from sqlalchemy.exc import IntegrityError
-
-from app.models.db.companies import RoleEnum
 from app.repository.company import CompanyRepository
 from app.repository.question import QuestionRepository
 from app.repository.quiz import QuizRepository
 from app.services.base import BaseService
-from app.utilities.formatters.http_error import error_wrapper
 
 
 class QuestionService(BaseService):

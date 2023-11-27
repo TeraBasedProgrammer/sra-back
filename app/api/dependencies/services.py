@@ -1,11 +1,13 @@
 from fastapi import Depends
 
 from app.api.dependencies.repository import get_repository
+from app.repository.attempt import AttemptRepository
 from app.repository.company import CompanyRepository
 from app.repository.question import QuestionRepository
 from app.repository.quiz import QuizRepository
 from app.repository.tag import TagRepository
 from app.repository.user import UserRepository
+from app.services.attempt import AttemptService
 from app.services.company import CompanyService
 from app.services.question import QuestionService
 from app.services.quiz import QuizService
@@ -59,4 +61,16 @@ def get_question_service(
     ),
 ) -> QuestionService:
     service = QuestionService(quiz_repository, question_repository, company_repository)
+    return service
+
+
+def get_attempt_service(
+    quiz_repository: QuizRepository = Depends(get_repository(QuizRepository)),
+    company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
+    attempt_repository: AttemptRepository = Depends(get_repository(AttemptRepository)),
+    tag_repository: TagRepository = Depends(get_repository(TagRepository)),
+) -> AttemptService:
+    service = AttemptService(
+        attempt_repository, quiz_repository, company_repository, tag_repository
+    )
     return service

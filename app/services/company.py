@@ -113,7 +113,14 @@ class CompanyService(BaseService):
             updated_company: Company = await self.company_repository.get_company_by_id(
                 company_id
             )
-            return CompanyFullSchema.from_model(updated_company)
+            # Retrieve company owner instance
+            owner = await self.company_repository.get_company_owner(company_id)
+
+            # Retrieve company staff count
+            staff_count = len(
+                await self.company_repository.get_company_members(company_id)
+            )
+            return CompanyFullSchema.from_model(updated_company, staff_count, owner)
         except IntegrityError:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,

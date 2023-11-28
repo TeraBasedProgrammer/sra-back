@@ -47,7 +47,9 @@ class CompanyRepository(BaseRepository):
         result: list[Company] = response.unique()
         return result
 
-    async def get_company_by_id(self, company_id: int, filter_string: str) -> Company:
+    async def get_company_by_id(
+        self, company_id: int, filter_string: str = ""
+    ) -> Company:
         logger.debug(f"Received data:\n{get_args()}")
 
         company_user_filter = (

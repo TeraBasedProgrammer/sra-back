@@ -1,5 +1,5 @@
 from sqlalchemy import delete, func, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import aliased, contains_eager, joinedload
 
 from app.config.logs.logger import logger
 from app.models.db.quizzes import Question, Quiz
@@ -45,6 +45,15 @@ class QuizRepository(BaseRepository):
             logger.debug(f'Retrieved quiz data by id "{quiz_id}": "{result}"')
         return result
 
+    async def has_question(self, quiz_id: int, question_id: int) -> bool:
+        query = await self.async_session.execute(
+            select(Question).where(
+                (Question.id == question_id) & (Question.quiz_id == quiz_id)
+            )
+        )
+        result: Question = query.scalar_one_or_none()
+        return bool(result)
+
     async def get_all_company_quizzes(self, company_id: int) -> list[Quiz]:
         logger.debug(f"Received data:\n{get_args()}")
 
@@ -69,10 +78,17 @@ class QuizRepository(BaseRepository):
         logger.debug(f"Received data:\n{get_args()}")
         tag_ids = [tag.id for tag in user_tags]
 
+        # Alias that prevents filtering tags inside Quiz
+        tag_quiz_alias = aliased(TagQuiz)
+
         query = (
             select(Quiz)
-            .join(TagQuiz, TagQuiz.quiz_id == Quiz.id)
-            .where((Quiz.company_id == company_id) & (TagQuiz.tag_id.in_(tag_ids)))
+            .join(Quiz.tags)
+            .join(tag_quiz_alias, tag_quiz_alias.quiz_id == Quiz.id, isouter=True)
+            .options(contains_eager(Quiz.tags))
+            .where(
+                (Quiz.company_id == company_id) & (tag_quiz_alias.tag_id.in_(tag_ids))
+            )
         )
 
         result: list[Quiz] = self.unpack(await self.get_many(query))

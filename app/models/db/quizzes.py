@@ -40,9 +40,9 @@ class Quiz(Base):
     start_time = Column(String, nullable=False)
     end_time = Column(String, nullable=False)
 
-    questions = relationship("Question", back_populates="quiz", lazy="joined")
+    questions = relationship("Question", back_populates="quiz", lazy="select")
     attempts = relationship("Attempt", back_populates="quiz", lazy="select")
-    tags = relationship("TagQuiz", back_populates="quizzes", lazy="joined")
+    tags = relationship("TagQuiz", back_populates="quizzes", lazy="select")
 
     @property
     def questions_count(self) -> int:

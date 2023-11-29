@@ -1,8 +1,10 @@
+import json
 from datetime import datetime, time, timedelta
 
 from sqlalchemy import func, select
 
 from app.config.logs.logger import logger
+from app.core.database import redis
 from app.models.db.attempts import Attempt
 from app.models.db.quizzes import Quiz
 from app.repository.base import BaseRepository
@@ -55,3 +57,17 @@ class AttemptRepository(BaseRepository):
 
         await self.save(new_attempt)
         return new_attempt.id
+
+    async def get_attempt_data(self, attempt_id: int) -> Attempt:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        query = select(Attempt).where(Attempt.id == attempt_id)
+        return await self.get_instance(query)
+
+    async def store_answers(
+        self, attempt_data, question_id, answers: list[str] | list[int]
+    ) -> None:
+        logger.debug(f"Received data:\n{get_args()}")
+
+        key = f"{attempt_data.id}:{question_id}"
+        await redis.set(key, json.dumps([answer for answer in answers]), ex=86400)

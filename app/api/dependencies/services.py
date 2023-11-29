@@ -69,8 +69,15 @@ def get_attempt_service(
     company_repository: CompanyRepository = Depends(get_repository(CompanyRepository)),
     attempt_repository: AttemptRepository = Depends(get_repository(AttemptRepository)),
     tag_repository: TagRepository = Depends(get_repository(TagRepository)),
+    question_repository: QuestionRepository = Depends(
+        get_repository(QuestionRepository)
+    ),
 ) -> AttemptService:
     service = AttemptService(
-        attempt_repository, quiz_repository, company_repository, tag_repository
+        attempt_repository,
+        quiz_repository,
+        company_repository,
+        tag_repository,
+        question_repository,
     )
     return service

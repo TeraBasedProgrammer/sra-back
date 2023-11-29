@@ -51,7 +51,7 @@ class QuizRepository(BaseRepository):
                 (Question.id == question_id) & (Question.quiz_id == quiz_id)
             )
         )
-        result: Question = query.scalar_one_or_none()
+        result: Question = query.unique().scalar_one_or_none()
         return bool(result)
 
     async def get_all_company_quizzes(self, company_id: int) -> list[Quiz]:

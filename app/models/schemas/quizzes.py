@@ -212,6 +212,8 @@ class QuizListSchema(BaseModel):
     start_date: str
     end_time: str
     end_date: str
+    description: str
+    completion_time: int
     tags: list[TagBaseSchema]
 
 

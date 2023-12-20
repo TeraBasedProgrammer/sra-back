@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column("start_time", sa.DateTime(), nullable=True),
         sa.Column("end_time", sa.DateTime(), nullable=True),
         sa.Column("spent_time", sa.Time(), nullable=True),
-        sa.Column("result", sa.Integer(), nullable=True),
+        sa.Column("result", sa.DECIMAL(), nullable=True),
         sa.ForeignKeyConstraint(["quiz_id"], ["quizzes.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),

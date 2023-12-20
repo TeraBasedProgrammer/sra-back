@@ -1,4 +1,6 @@
+import json
 from datetime import datetime, time
+from decimal import Decimal, getcontext
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -211,3 +213,58 @@ class AttemptService(BaseService):
         await self.attempt_repository.store_answers(
             attempt_data, question_id, answers.answers
         )
+
+    async def finish_attempt(self, attempt_id: int, current_user_id: int) -> None:
+        await self._validate_instance_exists(self.attempt_repository, attempt_id)
+        attempt_data: Attempt = await self.attempt_repository.get_attempt_data(
+            attempt_id
+        )
+        await self._validate_attempt_user(attempt_data, current_user_id)
+        await self._validate_attempt_is_ongoing(attempt_data)
+
+        raw_results: dict[str, str] = await self.attempt_repository.get_redis_answers(
+            attempt_id
+        )
+        attempt_result: Decimal = 0
+
+        # Calculate attempt result
+        quiz_questions_ids: list[int] = await self.quiz_repository.get_questions_ids(
+            attempt_data.quiz_id
+        )
+        for question_id in quiz_questions_ids:
+            raw_answers = raw_results.get(str(question_id))
+            if not raw_answers:
+                continue
+
+            answers: list[Any] = json.loads(raw_answers)
+            question: Question = await self.question_repository.get_question_by_id(
+                question_id
+            )
+
+            if question.type == QuestionTypeEnum.OpenAnswer:
+                answer_title: str = question.answers[0].title
+                if answer_title == answers[0]:
+                    attempt_result += 1
+            elif question.type == QuestionTypeEnum.SingleChoice:
+                answer_id: int = answers[0]
+                for answer in question.answers:
+                    if answer.id == answer_id and answer.is_correct:
+                        attempt_result += 1
+            else:
+                correct_answers = set(
+                    [answer for answer in question.answers if answer.is_correct]
+                )
+                incorrect_answers = set(
+                    [answer for answer in question.answers if not answer.is_correct]
+                )
+
+                if incorrect_answers.intersection(set(answers)):
+                    continue
+
+                getcontext().prec = 2
+                mark = Decimal(len(answers) / len(correct_answers))
+                attempt_result += mark
+
+        attempt_data.result = attempt_result
+        await self.attempt_repository.save(attempt_data)
+        return {"id": attempt_id, "result": attempt_result}

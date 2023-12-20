@@ -119,6 +119,11 @@ class QuizRepository(BaseRepository):
         )
         return result.scalar_one_or_none()
 
+    async def get_questions_ids(self, quiz_id: int) -> list[int]:
+        query = select(Question.id).where(Question.quiz_id == quiz_id)
+        result = self.unpack(await self.get_many(query))
+        return result
+
     async def update_quiz(self, quiz_id: int, quiz_data: QuizUpdate) -> Quiz:
         logger.debug(f"Received data:\n{get_args()}")
         updated_quiz = await self.update(quiz_id, quiz_data)

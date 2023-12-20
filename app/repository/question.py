@@ -88,3 +88,8 @@ class QuestionRepository(BaseRepository):
             f'Successfully deleted question instance "{question_id}" from the database'
         )
         return result
+
+    async def get_question_type(self, question_id: int) -> str:
+        query = select(Question.type).where(Question.id == question_id)
+        result = await self.get_instance(query)
+        return result

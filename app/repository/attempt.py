@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, time, timedelta
+from typing import Any
 
 from sqlalchemy import func, select
 
@@ -71,3 +72,14 @@ class AttemptRepository(BaseRepository):
 
         key = f"{attempt_data.id}:{question_id}"
         await redis.set(key, json.dumps([answer for answer in answers]), ex=86400)
+
+    async def get_redis_answers(self, attempt_id) -> dict[str, Any]:
+        answers_keys: list[str] = await redis.keys(f"{attempt_id}*")
+
+        # Gather questions and answers to be able to count result
+        answers_values: dict[str, Any] = {
+            key.split(":")[1]: answers
+            for key, answers in zip(answers_keys, await redis.mget(answers_keys))
+        }
+
+        return answers_values

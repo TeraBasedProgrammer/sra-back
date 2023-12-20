@@ -22,3 +22,15 @@ async def answer_question(
     return await attempt_service.answer_question(
         attempt_id, question_id, answers, current_user_id
     )
+
+
+@router.post("/{attempt_id}/finish/", response_model=None)
+async def finish_attempt(
+    attempt_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    attempt_service: AttemptService = Depends(get_attempt_service),
+) -> None:
+    """
+    ### Allows to finish a specific attempt instance
+    """
+    return await attempt_service.finish_attempt(attempt_id, current_user_id)

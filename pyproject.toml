@@ -45,3 +45,39 @@ skip = [
     ".rst",
     ".xml"
 ]
+
+[tool.poetry]
+name = "sra backend"
+version = "0.1.0"
+description = "Backend part of the group project for the \"Software requirements analysis\" subject"
+authors = ["Ilya <ilyadronov2332@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.group.linters.dependencies]
+black = "^23.12.1"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+alembic = "1.11.1"
+asyncpg = "0.28.0"
+celery = "5.3.4"
+email-validator = "2.0.0.post2"
+fastapi = "0.100.0"
+fastapi-pagination = "0.12.6"
+flower = "2.0.1"
+gunicorn = "21.2.0"
+passlib = "1.7.4"
+pre-commit = "3.5.0"
+pydantic-settings = "2.0.1"
+python-decouple = "3.8"
+pyjwt = "2.7.0"
+python-dotenv = "0.21.1"
+redis = "4.6.0"
+sqlalchemy = "2.0.18"
+uvicorn = "0.22.0"

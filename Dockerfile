@@ -1,3 +1,15 @@
+FROM python:3.10.6-alpine as requirements-stage
+
+WORKDIR /tmp
+
+RUN pip install poetry
+
+COPY ["./pyproject.toml", "./poetry.lock", "/tmp/"]
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+###
+
 FROM python:3.10.6-alpine
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -5,15 +17,18 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /code
 
-COPY ["./requirements.txt", "./pyproject.toml", "./alembic.ini", "./"]
+COPY ["./alembic.ini", "./pyproject.toml", "/code/"]
 
-RUN pip install --no-cache-dir -r requirements.txt  
+COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 
-COPY ./app ./app
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-COPY ./migrations ./migrations 
+COPY ./app /code/app
 
-COPY ./entrypoint.sh .
+COPY ./migrations /code/migrations 
+
+COPY ./entrypoint.sh /code/
+
 RUN chmod +x /code/entrypoint.sh
 
 EXPOSE 8000
